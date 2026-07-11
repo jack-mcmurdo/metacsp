@@ -11,7 +11,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M2 — framework core
 - [x] M3 — framework.multi machinery
 - [x] M4 — framework.meta machinery
-- [ ] M5 — temporal core (time, time.qualitative)
+- [x] M5 — temporal core (time, time.qualitative)
 - [ ] M6 — Allen intervals & activities
 - [ ] M7 — symbolic variables & multi TCSP
 - [ ] M8 — Boolean SAT
@@ -245,14 +245,14 @@ black-formatted (line length 100).
 - **Acceptance:** tests green. (Real end-to-end meta coverage arrives in M15.)
 
 ### M5 — Temporal core
-- [ ] `metacsp/time/`: `Bounds`, `Interval`, `TimePoint`, `SimpleDistanceConstraint`,
+- [x] `metacsp/time/`: `Bounds`, `Interval`, `TimePoint`, `SimpleDistanceConstraint`,
       `APSPSolver` per D3.
-- [ ] `metacsp/time/qualitative/`: `QualitativeAllenIntervalConstraint`, `SimpleInterval`,
+- [x] `metacsp/time/qualitative/`: `QualitativeAllenIntervalConstraint`, `SimpleInterval`,
       `SimpleAllenInterval`, `QualitativeAllenSolver` (path consistency).
-- [ ] Port Java `tests/TestAPSPSolver.java` and `tests/TestBounds.java` →
+- [x] Port Java `tests/TestAPSPSolver.java` and `tests/TestBounds.java` →
       `tests/test_apsp_solver.py`, `tests/test_bounds.py` (translate every JUnit assertion;
       the expected bounds values in those files are the oracle).
-- [ ] Port examples `examples/TestAPSPSolver*.java` (3 files),
+- [x] Port examples `examples/TestAPSPSolver*.java` (3 files),
       `TestQualitativeAllenConstraintSolver{,UNSAT}.java` → `examples/*.py`.
 - **Acceptance:** ported JUnit assertions pass verbatim; each example runs clean via
   `python examples/<file>.py`.
