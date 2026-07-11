@@ -230,3 +230,20 @@ class DelegateTree(Generic[V, E]):
                 result.add_child(edge, node, child)
                 stack.append(child)
         return result
+
+    def add_subtree(self, subtree: DelegateTree[V, E], parent: V, edge: E) -> None:
+        """Graft another tree onto this one, as a child of parent via edge
+        (JUNG ``TreeUtils.addSubTree``); subtree's root becomes that child,
+        and the rest of subtree's structure is copied in below it."""
+        root = subtree.root
+        if root is None:
+            return
+        self.add_child(edge, parent, root)
+        stack = [root]
+        while stack:
+            node = stack.pop(0)
+            for child in subtree.children(node):
+                child_edge = subtree.parent_edge(child)
+                assert child_edge is not None
+                self.add_child(child_edge, node, child)
+                stack.append(child)

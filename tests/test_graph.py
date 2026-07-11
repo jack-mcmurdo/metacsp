@@ -165,3 +165,30 @@ class TestDelegateTree:
         assert sub.root == "e"
         assert sub.vertices() == ["e"]
         assert sub.edges() == []
+
+    def test_add_subtree_grafts_onto_parent(self):
+        t = DelegateTree()
+        t.set_root("root")
+        t.add_child("r-x", "root", "x")
+        sub = DelegateTree()
+        sub.set_root("a")
+        sub.add_child("a-c", "a", "c")
+        sub.add_child("a-d", "a", "d")
+        t.add_subtree(sub, "root", "r-a")
+        assert t.children("root") == ["x", "a"]
+        assert t.parent("a") == "root"
+        assert t.parent_edge("a") == "r-a"
+        assert t.children("a") == ["c", "d"]
+        assert t.depth("c") == 2
+        # source tree untouched
+        assert sub.root == "a"
+        assert sub.parent("a") is None
+
+    def test_add_subtree_of_leaf(self):
+        t = DelegateTree()
+        t.set_root("root")
+        sub = DelegateTree()
+        sub.set_root("leaf")
+        t.add_subtree(sub, "root", "r-leaf")
+        assert t.children("root") == ["leaf"]
+        assert t.is_leaf("leaf")
