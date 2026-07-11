@@ -8,7 +8,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 
 - [x] M0 — repo scaffold (pyproject, CI, release workflow, package skeleton)
 - [x] M1 — utilities: exceptions, logging, math, graph
-- [ ] M2 — framework core
+- [x] M2 — framework core
 - [ ] M3 — framework.multi machinery
 - [ ] M4 — framework.meta machinery
 - [ ] M5 — temporal core (time, time.qualitative)
@@ -220,12 +220,12 @@ black-formatted (line length 100).
 - **Acceptance:** `pytest tests/test_graph.py` green.
 
 ### M2 — Framework core
-- [ ] `metacsp/framework/`: `Domain`, `Variable`, `Constraint`, `BinaryConstraint`,
+- [x] `metacsp/framework/`: `Domain`, `Variable`, `Constraint`, `BinaryConstraint`,
       `ConstraintNetwork` (on `DirectedSparseMultigraph`, with D2 listeners),
       `ConstraintSolver`, `ConstraintNetworkChangeEvent`, `ValueChoiceFunction`,
       `ValueOrderingH`, `VariableOrderingH`, `ConstraintOrderingH`, `VariablePrototype`,
       `DummyVariable`, `DummyConstraint`, `ConstraintNetworkMarking`.
-- [ ] `tests/test_framework.py`: build a network of `DummyVariable`s, add/remove constraints,
+- [x] `tests/test_framework.py`: build a network of `DummyVariable`s, add/remove constraints,
       assert graph queries and that change listeners fire in order.
 - **Acceptance:** `pytest tests/test_framework.py` green.
 
