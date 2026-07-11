@@ -10,7 +10,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M1 — utilities: exceptions, logging, math, graph
 - [x] M2 — framework core
 - [x] M3 — framework.multi machinery
-- [ ] M4 — framework.meta machinery
+- [x] M4 — framework.meta machinery
 - [ ] M5 — temporal core (time, time.qualitative)
 - [ ] M6 — Allen intervals & activities
 - [ ] M7 — symbolic variables & multi TCSP
@@ -237,10 +237,10 @@ black-formatted (line length 100).
 - **Acceptance:** tests green.
 
 ### M4 — framework.meta machinery
-- [ ] `metacsp/framework/meta/`: `MetaVariable`, `MetaConstraint`, `MetaConstraintSolver`
+- [x] `metacsp/framework/meta/`: `MetaVariable`, `MetaConstraint`, `MetaConstraintSolver`
       (backtracking search on `DelegateTree`), `MultiMetaConstraint`, `FocusConstraint`,
       `NullConstraintNetwork`.
-- [ ] `tests/test_meta_framework.py`: a minimal meta-CSP (dummy meta constraint flagging a
+- [x] `tests/test_meta_framework.py`: a minimal meta-CSP (dummy meta constraint flagging a
       fabricated conflict with two resolvers) — assert backtracking explores and terminates.
 - **Acceptance:** tests green. (Real end-to-end meta coverage arrives in M15.)
 
