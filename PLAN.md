@@ -9,7 +9,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M0 — repo scaffold (pyproject, CI, release workflow, package skeleton)
 - [x] M1 — utilities: exceptions, logging, math, graph
 - [x] M2 — framework core
-- [ ] M3 — framework.multi machinery
+- [x] M3 — framework.multi machinery
 - [ ] M4 — framework.meta machinery
 - [ ] M5 — temporal core (time, time.qualitative)
 - [ ] M6 — Allen intervals & activities
@@ -230,9 +230,9 @@ black-formatted (line length 100).
 - **Acceptance:** `pytest tests/test_framework.py` green.
 
 ### M3 — framework.multi machinery
-- [ ] `metacsp/framework/multi/`: `MultiDomain`, `MultiVariable`, `MultiConstraint`,
+- [x] `metacsp/framework/multi/`: `MultiDomain`, `MultiVariable`, `MultiConstraint`,
       `MultiBinaryConstraint`, `MultiConstraintSolver` (reflection → C5 factories).
-- [ ] `tests/test_multi_framework.py`: construct a two-level `MultiVariable` solver with dummy
+- [x] `tests/test_multi_framework.py`: construct a two-level `MultiVariable` solver with dummy
       internal solvers; assert variable creation cascades and constraint decomposition.
 - **Acceptance:** tests green.
 
