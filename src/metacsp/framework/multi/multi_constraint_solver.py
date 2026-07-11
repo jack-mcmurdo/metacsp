@@ -53,11 +53,11 @@ class MultiConstraintSolver(ConstraintSolver):
         constraint_types: list[type],
         variable_type: type,
         internal_solvers: list[ConstraintSolver],
-        ingredients: list[int],
+        ingredients: list[int] | None,
     ) -> None:
         super().__init__(constraint_types, variable_type)
         self.constraint_solvers = list(internal_solvers)
-        self.ingredients = list(ingredients)
+        self.ingredients = list(ingredients) if ingredients is not None else None
         self._allow_inconsistencies = False
         self._new_constraint_mapping: dict[Constraint, Constraint] = {}
 
@@ -88,7 +88,7 @@ class MultiConstraintSolver(ConstraintSolver):
             return not self._allow_inconsistencies
         return False
 
-    def set_ingredients(self, ingredients: list[int]) -> None:
+    def set_ingredients(self, ingredients: list[int] | None) -> None:
         """Set the number of internal variables of each type to create when
         calling :meth:`create_variables_sub`."""
         self.ingredients = list(ingredients)
