@@ -7,7 +7,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 ## Milestone progress
 
 - [x] M0 — repo scaffold (pyproject, CI, release workflow, package skeleton)
-- [ ] M1 — utilities: exceptions, logging, math, graph
+- [x] M1 — utilities: exceptions, logging, math, graph
 - [ ] M2 — framework core
 - [ ] M3 — framework.multi machinery
 - [ ] M4 — framework.meta machinery
