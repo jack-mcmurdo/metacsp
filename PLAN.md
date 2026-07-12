@@ -25,7 +25,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M16 — simple planner & fuzzy-activity meta solver
 - [x] M17 — trajectory envelope scheduler
 - [x] M18 — hybrid planner
-- [ ] M19 — sensing & dispatching
+- [x] M19 — sensing & dispatching
 - [ ] M20 — online monitoring
 - [ ] M21 — serialization, plotting, viz protocol doc
 - [ ] M22 — examples sweep & README
