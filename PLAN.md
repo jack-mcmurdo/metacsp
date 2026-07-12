@@ -12,7 +12,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M3 — framework.multi machinery
 - [x] M4 — framework.meta machinery
 - [x] M5 — temporal core (time, time.qualitative)
-- [ ] M6 — Allen intervals & activities
+- [x] M6 — Allen intervals & activities
 - [x] M7 — symbolic variables & multi TCSP
 - [x] M8 — Boolean SAT
 - [ ] M9 — fuzzy solvers
@@ -269,12 +269,12 @@ black-formatted (line length 100).
   `python examples/<file>.py`.
 
 ### M6 — Allen intervals & activities
-- [ ] `metacsp/multi/allen_interval/` (incl. `AllenIntervalNetworkUtilities`),
+- [x] `metacsp/multi/allen_interval/` (incl. `AllenIntervalNetworkUtilities`),
       `metacsp/multi/activity/` (`SymbolicVariableActivity`, `ActivityNetworkSolver`,
       `Timeline`).
-- [ ] Port Java `tests/multi/{TestAllenInterval,TestAllenIntervalNetworkSolver,
+- [x] Port Java `tests/multi/{TestAllenInterval,TestAllenIntervalNetworkSolver,
       TestActivityNetworkSolver}.java` → pytest.
-- [ ] Port the `examples/multi/*.java` files that touch only these modules.
+- [x] Port the `examples/multi/*.java` files that touch only these modules.
 - **Acceptance:** ported assertions pass; examples run clean.
 
 ### M7 — Symbolic variables & multi TCSP
