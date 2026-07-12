@@ -28,7 +28,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M19 — sensing & dispatching
 - [x] M20 — online monitoring
 - [x] M21 — serialization, plotting, viz protocol doc
-- [ ] M22 — examples sweep & README
+- [x] M22 — examples sweep & README
 - [ ] M23 — tutorial demos (meta-csp-tutorial repo)
 
 **Known ordering exception (M6/M7/M8):** while implementing M6, `multi/activity/`'s
@@ -421,11 +421,11 @@ black-formatted (line length 100).
 - **Acceptance:** tests green with and without `dearpygui` installed.
 
 ### M22 — Examples sweep & README
-- [ ] Every remaining `examples/**/*.java` (non-skip-list) is ported to `examples/*.py`;
+- [x] Every remaining `examples/**/*.java` (non-skip-list) is ported to `examples/*.py`;
       formerly-Swing examples either plot via `metacsp.plot` or dump JSON via
       `metacsp.serialization`. Any example that cannot be meaningfully ported is listed in
       `examples/SKIPPED.md` with a one-line reason.
-- [ ] README: replace the “Status” section with a feature table and a quickstart snippet.
+- [x] README: replace the “Status” section with a feature table and a quickstart snippet.
 - **Acceptance:** full `pytest` green on 3.10–3.12; `black --check` clean;
   `python examples/<each>.py` exits 0.
 
