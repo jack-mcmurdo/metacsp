@@ -31,7 +31,11 @@ DOMAIN_FILE = (
     / "testProactivePlanningLucia.ddl"
 )
 SENSOR_TRACES_DIR = Path(__file__).resolve().parents[2] / "tests" / "data" / "sensorTraces"
-_RUN_SECONDS = 5.0
+# The sensor traces' latest reading (location.st: DiningRoom) is at t=20000ms;
+# the animator's clock advances 1:1 with wall-clock time, so the run must
+# last past 20s of wall time for the full scenario (stove turning on, the
+# planner finding a solution, the move to the dining room) to play out.
+_RUN_SECONDS = 25.0
 
 
 def main() -> None:

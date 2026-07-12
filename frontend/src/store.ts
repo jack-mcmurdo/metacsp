@@ -69,7 +69,16 @@ interface VizState {
 function maxPulse(timelines: TimelineDict[]): number | null {
   let max: number | null = null;
   for (const tl of timelines) {
-    for (const p of tl.pulses) {
+    // A timeline's last pulse is the upper bound of its still-open final
+    // interval, which for a component whose current activity has no
+    // resolved end (e.g. an internal clock/driver variable deadlined at
+    // the solver's horizon rather than "now") can be a huge, unmoving
+    // sentinel value. Counting it here would pin the live-follow viewport
+    // to that sentinel forever after the first message, since `max` would
+    // never change again. Only fully-resolved transitions (all pulses but
+    // the last) are reliable stand-ins for "now".
+    for (let i = 0; i < tl.pulses.length - 1; i++) {
+      const p = tl.pulses[i];
       if (max === null || p > max) max = p;
     }
   }
