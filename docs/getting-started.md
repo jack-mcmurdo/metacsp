@@ -5,11 +5,11 @@
 From a clone of the repo:
 
 ```bash
-pip install -e ".[dev]"      # development: tests, formatter, dearpygui
+pip install -e ".[dev]"      # development: tests, formatter, viz server deps
 ```
 
-`dev` pulls in `dearpygui` for the optional live viewer ([metacsp.viz](api/viz.md)); to install
-just that extra on its own, use `pip install -e ".[viz]"`.
+`dev` pulls in `starlette`/`uvicorn` for the optional live viewer ([metacsp.viz](api/viz.md));
+to install just that extra on its own, use `pip install -e ".[viz]"`.
 
 ## First solver
 

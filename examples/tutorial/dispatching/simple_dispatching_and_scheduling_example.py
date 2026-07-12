@@ -2,8 +2,8 @@
 meta-csp-tutorial repo (M23).
 
 The Java original also opens a ``TimelinePublisher``/``TimelineVisualizer``
-(Swing); replaced here by M21's ``metacsp.viz.timeline.TimelineWindow``
-(dearpygui). The "poor man's key listener" ``while True`` stdin loop is
+(Swing); replaced here by the browser-based ``metacsp.viz.serve``. The
+"poor man's key listener" ``while True`` stdin loop is
 preserved as-is (meant to be run and typed into by a newcomer); ``input()``
 raises ``EOFError`` on closed stdin (where Java's ``BufferedReader
 .readLine()`` would return ``null``), caught here to exit cleanly instead
@@ -25,8 +25,7 @@ from metacsp.multi.activity.activity import Activity
 from metacsp.multi.activity.activity_network_solver import ActivityNetworkSolver
 from metacsp.multi.activity.symbolic_variable_activity import SymbolicVariableActivity
 from metacsp.sensing.constraint_network_animator import ConstraintNetworkAnimator
-from metacsp.viz.app import VizApp
-from metacsp.viz.timeline import TimelineWindow
+from metacsp.viz import serve
 from util import parsing
 
 _SPECIFICATION_FILE = Path(__file__).resolve().parent / "specification2.txt"
@@ -83,12 +82,12 @@ def main() -> None:
     df_ur = _PrintingDispatchingFunction("UR")
     animator.add_dispatching_functions(df_mir_1, df_mir_2, df_ur)
 
-    # Visualize progression, with automatic update every 100 msec.
-    app = VizApp(title="SimpleDispatchingAndSchedulingExample")
-    window = TimelineWindow(ans.constraint_network, ["MiR_1", "MiR_2", "UR"])
-    app.create()
-    window.build(app)
-    window.attach()
+    # Visualize progression live in a browser tab.
+    try:
+        server = serve(ans, ["MiR_1", "MiR_2", "UR"])
+    except RuntimeError as exc:
+        print(f"(visualization unavailable: {exc})")
+        server = None
 
     try:
         while True:
@@ -114,8 +113,8 @@ def main() -> None:
                 except (ValueError, IndexError):
                     pass
     finally:
-        window.destroy()
-        app.destroy()
+        if server is not None:
+            server.stop()
         animator.teardown()
 
 

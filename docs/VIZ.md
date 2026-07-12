@@ -1,105 +1,104 @@
 # Visualization protocol
 
-M21 replaces the Java Swing UI (`utility/UI/`, `utility/timelinePlotting/`) with two things:
+The webviz milestone replaces the in-process dearpygui viewer with a browser-based one: a
+websocket server (`metacsp.viz.server.VizServer`) composes JSON messages from
+`metacsp.serialization`'s functions and streams them to a prebuilt Vite/React frontend shipped
+inside the wheel at `metacsp/viz/static/`. The three-layer architecture stays the same: core
+fires D2 change events -> `metacsp.serialization` produces JSON -> the viewer consumes it. Only
+the viewer layer changed.
 
-1. **`metacsp.viz`** — an in-scope live viewer built on [dearpygui](https://github.com/hoffstadt/DearPyGui),
-   available via `pip install metacsp[viz]`. It subscribes directly to a `ConstraintNetwork`'s
-   D2 change-listener stream (`add_change_listener`) and redraws in-process. This is what you
-   want if you're running Python and want to watch a solver work.
-2. **`metacsp.serialization`** — a JSON snapshot/delta format, decoupled from any particular
-   renderer. This is the wire format for the live viewer's own updates, and is the intended
-   integration point for a **future** out-of-process consumer (e.g. a browser-based
-   WebSocket+WebGL viewer) — **not built by this plan**, but documented here so that future
-   work has a stable contract to target without touching `metacsp` internals again.
+## `metacsp.viz` (`viz` extra)
 
-## `metacsp.viz` (in scope, M21)
+- `metacsp.viz.server.VizServer(solver, components, *, envelopes=None, period_ms=2000, host="127.0.0.1", port=8722)`
+  -- owns one Starlette app: a `/ws` websocket endpoint plus (when the frontend has been built)
+  the static frontend mounted at `/`. `start()` runs uvicorn in a daemon thread and returns once
+  it's accepting connections; `run()` blocks; `stop()` removes the D2 change listener and shuts
+  uvicorn down.
+- `metacsp.viz.serve(solver, components, *, envelopes=None, period_ms=2000, host=..., port=..., open_browser=True)`
+  -- convenience: constructs a `VizServer`, starts it, opens it in the system browser, and
+  returns the server so the caller can `.stop()` it later.
+- Import-guarded: `import metacsp.viz` raises a clear `ImportError` (not a bare
+  `ModuleNotFoundError`) if `starlette`/`uvicorn` aren't installed, so the rest of `metacsp`
+  stays usable headless.
+- If `metacsp/viz/static/` has no `index.html` (a source checkout without a frontend build),
+  `VizServer.start()`/`.run()` raise a `RuntimeError` telling the caller to run
+  `npm --prefix frontend run build`. The `/ws` endpoint itself stays testable headlessly (e.g.
+  via `starlette.testclient.TestClient`) regardless of whether the frontend has been built --
+  only `start()`/`run()` enforce the build.
 
-- `metacsp.viz.app.VizApp` — owns one dearpygui context/viewport. `create()` sets up the
-  context without showing a window (used headlessly by `tests/test_viz.py`); `show()`/`run()`
-  display it and block on the render loop.
-- `metacsp.viz.timeline.TimelineWindow` — one Gantt row per component, built from that
-  component's `SymbolicTimeline` (`meta/symbolsAndTime/SymbolicTimeline.java`, already ported in
-  M15). Call `.attach()` to have it redraw itself on every D2 change event; call `.refresh()` to
-  redraw once manually (e.g. from a `SnapshotPublisher` tick instead of/in addition to D2
-  events).
-- Both are import-guarded: `import metacsp.viz` raises a clear `ImportError` (not a bare
-  `ModuleNotFoundError`) if `dearpygui` isn't installed, so the rest of `metacsp` stays usable
-  headless.
-- Geometry/trajectory canvas views (e.g. a live drawing of `TrajectoryEnvelope` footprints,
-  replacing `utility/UI/JTSDrawingPanel.java`) are not built in M21 — `VizApp` exists precisely
-  so a later view of that kind can be added without new bootstrap code.
+## Wire protocol v2
 
-## JSON snapshot/delta schema (`metacsp.serialization`)
+Every message is a JSON object with `"kind"`, a monotonic integer `"seq"`, and a unix-ms
+integer `"ts"` (required by the frontend's history scrubber).
 
-Every message is a JSON object with a `"kind"` key.
+### `{"kind": "snapshot", ...}`
 
-### `variable_to_dict(v)`
-
-```json
-{"id": 3, "class": "SymbolicVariableActivity", "domain": "..."}
-```
-
-### `constraint_to_dict(c)`
+Sent once on client connect and every `period_ms` after that:
 
 ```json
-{"class": "AllenIntervalConstraint", "from": 3, "to": 5, "label": "..."}
+{"kind": "snapshot", "seq": 1, "ts": 1700000000000,
+ "variables": [ {"id", "class", "domain"}, ... ],
+ "constraints": [ {"class", "from", "to", "label"}, ... ],
+ "timelines": [ {"component", "pulses", "values"}, ... ],
+ "envelopes": [ {"type": "Feature", "geometry", "properties"}, ... ]}
 ```
 
-`from`/`to` are variable ids; both are `null` for a constraint that is not a `BinaryConstraint`
-(e.g. a masked/hyperedge constraint).
+`constraints` is exactly `network_to_dict`'s `"constraints"` key (see `metacsp.serialization`).
+`variables` is `network_to_dict`'s `"variables"` with one field added: `"component"` (the
+variable's `Variable.component`, `null` if unset) -- needed by the frontend's click-to-inspect
+panel to find the variables belonging to the component an interval came from, since
+`variable_to_dict` itself (unchanged) has no such field. `timelines` is one
+`timeline_to_dict(net, component)` per entry in the `components` list passed to `VizServer`.
+`envelopes` is one `trajectory_envelope_to_dict` per entry in the `envelopes` list passed to
+`VizServer` (empty if none were given).
 
-### `network_to_dict(net)` — a full snapshot
+### `{"kind": "delta", ...}`
+
+Sent immediately per D2 change event (feeds the frontend's event log):
 
 ```json
-{"variables": [ {"id", "class", "domain"}, ... ],
- "constraints": [ {"class", "from", "to", "label"}, ... ]}
+{"kind": "delta", "seq": 2, "ts": 1700000000050,
+ "event": "variable_added" | "variable_removed" | "constraint_added" | "constraint_removed",
+ "variable": {...}}   // or "constraint": {...}, matching event.kind
 ```
 
-### `timeline_to_dict(an, component)`
+`variable` also carries the added `"component"` field described above.
+
+### `{"kind": "timelines", ...}`
+
+Sent ~50 ms after a burst of change events settles (debounced), so the Gantt view updates live
+without waiting for the next full snapshot:
 
 ```json
-{"component": "Robot1", "pulses": [0, 100, 200, 300], "values": [["A"], null, ["B"], null]}
+{"kind": "timelines", "seq": 3, "ts": 1700000000100,
+ "timelines": [ {"component", "pulses", "values"}, ... ]}
 ```
 
-`values[i]` is the list of symbols held by every activity active in `[pulses[i], pulses[i+1])`;
-`null` means no activity holds there (`Timeline.is_undetermined`) — see
-`multi/activity/Timeline.java`. `values` has the same length as `pulses`, with an
-always-`null` trailing entry (mirrors the Java class's own array padding). An empty list `[]`
-(as opposed to `null`) means `Timeline.is_inconsistent` — an activity's domain was restricted to
-zero symbols.
+Timelines are computed on the solver's own thread, inside the D2 change-listener callback --
+not on the server's asyncio event loop thread -- since change listeners fire synchronously
+right after a mutation is applied and before another mutation can start on that thread. This
+sidesteps the risk of reading the constraint network concurrently with a solver mutating it;
+only the resulting plain dicts cross the thread boundary.
 
-### `trajectory_envelope_to_dict(te)` — GeoJSON-style
+### `{"kind": "command", ...}` (reserved, unimplemented)
 
-```json
-{"type": "Feature",
- "geometry": {"type": "Polygon", "coordinates": [[[x, y], ...]]},
- "properties": {"id": 7, "component": "Robot1", "robot_id": 1,
-                "symbols": ["Driving"], "est": 0, "eet": 12000}}
-```
+An inbound message kind reserved for future solver control from the browser (e.g. pause/step).
+v1 of the browser viewer is view-only: all interactivity (zoom, pan, filtering, the history
+scrubber) is client-side state over the messages above, and the server does not currently read
+anything sent by the client.
 
-`geometry` is produced by `shapely.geometry.mapping()` on
-`TrajectoryEnvelope.spatial_envelope.polygon` — the union of the envelope's footprint swept
-along its path (see D4).
+## `metacsp.serialization` (unchanged, still public API)
 
-### `SnapshotPublisher(solver, period_ms, callback)`
+`SnapshotPublisher`, `variable_to_dict`, `constraint_to_dict`, `network_to_dict`,
+`timeline_to_dict`, and `trajectory_envelope_to_dict` are untouched by this milestone --
+`VizServer` composes its own messages from the same functions rather than wrapping
+`SnapshotPublisher`. See the docstrings in `metacsp/serialization.py` for their schemas; the
+snapshot section above documents how `VizServer` assembles them into protocol v2 messages.
 
-A D9-style daemon thread (`start()`/`teardown()`) that calls `callback(json_str)`:
+## Frontend
 
-- once per `period_ms`, with a full snapshot: `{"kind": "snapshot", "variables": [...], "constraints": [...]}`
-  (the keys of `network_to_dict`, plus `"kind"`).
-- once per D2 change event, immediately (no waiting for the next tick): a delta message
-  `{"kind": "delta", "event": "variable_added" | "variable_removed" | "constraint_added" | "constraint_removed",
-  "variable": {...}}` (variable events) or `{"kind": "delta", "event": ..., "constraint": {...}}`
-  (constraint events).
-
-This replaces the publish role of `utility/timelinePlotting/TimelinePublisher.java` (which
-instead rendered `SymbolicTimeline`s to PNG `BufferedImage`s on a background encoding thread);
-the JSON format here carries the same underlying information without any image-encoding step,
-so both `metacsp.viz` and a future out-of-process consumer can render it however they like.
-
-## Future work (out of scope for this plan)
-
-A browser-based viewer (WebSocket server pushing `SnapshotPublisher` output to a WebGL/canvas
-frontend) is the natural next consumer of this schema, but is not built here. Anything
-implementing it should only need this document and `metacsp.serialization`'s public functions —
-no changes to `metacsp` core should be required.
+`frontend/` (Vite + React + TypeScript + Tailwind + shadcn/ui) is built with
+`npm --prefix frontend run build`, which outputs to `src/metacsp/viz/static/` (gitignored,
+rebuilt on demand). Release wheels always ship a prebuilt `static/` (CI builds the frontend
+before `python -m build`); end users installing from PyPI never need Node. `src/lib/protocol.ts`
+mirrors this document's message shapes -- keep the two in sync when either changes.

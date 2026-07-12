@@ -35,7 +35,7 @@ to the [API Reference](api/framework.md).
 | Sensing & dispatching | `sensing/`, `dispatching/` | `metacsp.sensing`, `metacsp.dispatching` |
 | Online monitoring (fuzzy hypothesis inference) | `onLineMonitoring/` | `metacsp.online_monitoring` |
 | JSON serialization (snapshot/delta) | — (new) | `metacsp.serialization` |
-| Live viewer (dearpygui, replaces Swing) | `utility/UI/`, `utility/timelinePlotting/` | `metacsp.viz` (`viz` extra) |
+| Live viewer (browser-based, replaces Swing) | `utility/UI/`, `utility/timelinePlotting/` | `metacsp.viz` (`viz` extra) |
 
 ## License
 
