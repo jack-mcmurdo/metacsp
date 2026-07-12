@@ -168,11 +168,18 @@ black-formatted (line length 100).
 - **D9 — Threads:** `sensing/ConstraintNetworkAnimator.java`, `dispatching/Dispatcher.java`,
   `sensing/Sensor.java`, `onLineMonitoring/*` keep their `while True: sleep(period_ms/1000)`
   loops on `threading.Thread(daemon=True)`. Same period semantics (ms).
-- **D10 — Visualization:** no GUI is ported. M21 builds
-  `metacsp/serialization.py` (JSON snapshot/delta) + optional matplotlib plots
-  (`metacsp/plot/`, import-guarded so `metacsp` works without matplotlib). Browser
-  WebSocket+WebGL viewer is explicitly **future work, not in this plan** — only the protocol
-  doc `docs/VIZ.md` is written now.
+- **D10 — Visualization:** the Swing UI is not ported 1:1, but a **live GUI is in scope**,
+  replacing it. M21 builds `metacsp/serialization.py` (JSON snapshot/delta, unchanged) plus
+  `metacsp/viz/` — a live viewer using **dearpygui** (chosen over `imgui`/`pyimgui`: dearpygui
+  ships its own renderer/windowing/build, `pip install dearpygui` and go; `pyimgui` requires
+  hand-wiring a separate backend such as `glfw` or `sdl2` plus a manual render loop for no
+  benefit here). `metacsp/viz/` is import-guarded (`viz` extra) so `metacsp` works headless
+  without it. The viewer subscribes to the D2 change-listener stream (and/or polls
+  `SnapshotPublisher`) and redraws a timeline/Gantt view live as the constraint network
+  changes — this replaces `utility/timelinePlotting` + `PlotActivityNetworkGantt` directly
+  rather than via a static matplotlib plot. A browser WebSocket+WebGL viewer remains
+  **future work, not in this plan** — `docs/VIZ.md` documents the JSON snapshot + delta
+  schema for that future consumer.
 
 ## Module map
 
@@ -208,8 +215,8 @@ black-formatted (line length 100).
 | `meta/hybridPlanner/` (8) | `metacsp/meta/hybrid_planner/` | M18 |
 | `sensing/` (6), `dispatching/` (2) | `metacsp/sensing/`, `metacsp/dispatching/` | M19 |
 | `onLineMonitoring/` (13, skip 3 `*OLD`) | `metacsp/online_monitoring/` | M20 |
-| `utility/timelinePlotting/` (2) | `metacsp/plot/timeline.py` (matplotlib rewrite) | M21 |
-| — (new) | `metacsp/serialization.py`, `docs/VIZ.md` | M21 |
+| `utility/timelinePlotting/` (2) | `metacsp/viz/timeline.py` (dearpygui live rewrite) | M21 |
+| — (new) | `metacsp/serialization.py`, `metacsp/viz/`, `docs/VIZ.md` | M21 |
 
 ## Skip list (do not port; note nothing else may be skipped)
 
@@ -374,21 +381,31 @@ black-formatted (line length 100).
       hypothesis emerges.
 - **Acceptance:** tests green.
 
-### M21 — Serialization, plotting, viz protocol doc
+### M21 — Serialization, live viz (dearpygui), protocol doc
 - [ ] `metacsp/serialization.py`: `network_to_dict(net)` →
       `{"variables": [{"id", "class", "domain": str}], "constraints": [{"class", "from",
       "to", "label": str}]}`; `timeline_to_dict`, `trajectory_envelope_to_dict` (GeoJSON-style
       geometry); `SnapshotPublisher(solver, period_ms, callback)` — a D9-style thread that
       calls `callback(json_str)` each period (the Java `TimelinePublisher`/
       `TimelineVisualizer` loop, minus Swing); delta events wired to D2 listeners.
-- [ ] `metacsp/plot/timeline.py` (matplotlib, `viz` extra): timeline/Gantt plot equivalent to
-      `utility/timelinePlotting` + `PlotActivityNetworkGantt`.
-- [ ] `docs/VIZ.md`: document the JSON snapshot + delta message schema and the intended future
+- [ ] `metacsp/viz/` (`dearpygui`, `viz` extra, import-guarded so `metacsp` works headless):
+      `metacsp/viz/timeline.py` — a live Gantt/timeline window equivalent to
+      `utility/timelinePlotting` + `PlotActivityNetworkGantt`, redrawing as the underlying
+      `ConstraintNetwork` fires D2 change events (or on each `SnapshotPublisher` tick).
+      `metacsp/viz/app.py` — thin `dearpygui` app/window bootstrap (create context, viewport,
+      render loop) reused by other live views added in later milestones (e.g. a geometry/
+      trajectory canvas).
+- [ ] `docs/VIZ.md`: document the JSON snapshot + delta message schema, and the intended future
       browser stack (WebSocket server pushing `SnapshotPublisher` output + delta events to a
-      WebGL/canvas viewer). **Viewer itself: future work, out of scope.**
+      WebGL/canvas viewer) as follow-on work distinct from the now-in-scope dearpygui viewer.
+      **Browser viewer itself: future work, out of scope.**
 - [ ] `tests/test_serialization.py`: round-trip a small activity network to dict, assert
       schema keys and delta events fire.
-- **Acceptance:** tests green with and without matplotlib installed.
+- [ ] `tests/test_viz.py`: import-guard test — `metacsp.viz` is importable and raises a clear
+      `ImportError`-derived message (not ported, but tested for) only when `dearpygui` is
+      absent; when present, build a timeline window headlessly (create context, populate,
+      destroy context, no `show_viewport`) and assert no exceptions.
+- **Acceptance:** tests green with and without `dearpygui` installed.
 
 ### M22 — Examples sweep & README
 - [ ] Every remaining `examples/**/*.java` (non-skip-list) is ported to `examples/*.py`;

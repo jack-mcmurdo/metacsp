@@ -20,8 +20,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-viz = ["matplotlib>=3.7"]
-dev = ["pytest>=7", "black>=24", "matplotlib>=3.7"]
+viz = ["dearpygui>=1.11"]
+dev = ["pytest>=7", "black>=24", "dearpygui>=1.11"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/metacsp"]
