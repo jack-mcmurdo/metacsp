@@ -28,6 +28,7 @@ __all__ = [
     "WrongSymbolListException",
     "MalformedBoundsException",
     "MalformedSimpleDistanceConstraint",
+    "NetworkMaintenanceError",
 ]
 
 
@@ -164,3 +165,26 @@ class MalformedSimpleDistanceConstraint(Exception):
             f"SimpleDistanceConstraint {c} is malformed"
             f" (this is a BUG (ref #{bug_id}) -- please notify maintainer(s))"
         )
+
+
+class NetworkMaintenanceError(Exception):
+    """Port of sensing/NetworkMaintenanceError.java (an ``Error`` in Java; see
+    module docstring on Java ``Error``/``Exception`` both mapping to
+    :class:`Exception`).
+
+    Java overloads the constructor on ``AllenIntervalConstraint...`` (one or
+    more maintenance constraints that could not be added) vs.
+    ``(long timeNow, long timeSensor)`` (a sensor value arriving ahead of the
+    current time). Both are reachable from a single Python call site,
+    dispatching on whether exactly two ``int`` arguments were given.
+    """
+
+    def __init__(self, *args: Any):
+        if len(args) == 2 and all(isinstance(a, int) for a in args):
+            time_now, time_sensor = args
+            super().__init__(
+                "Cannot add maintenance constraint(s) because sensor value is ahead by "
+                f"{time_sensor - time_now}"
+            )
+        else:
+            super().__init__(f"Cannot add maintenance constraint(s) {_java_array_str(args)}")
