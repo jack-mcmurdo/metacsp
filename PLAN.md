@@ -13,7 +13,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M4 — framework.meta machinery
 - [x] M5 — temporal core (time, time.qualitative)
 - [ ] M6 — Allen intervals & activities
-- [ ] M7 — symbolic variables & multi TCSP
+- [x] M7 — symbolic variables & multi TCSP
 - [x] M8 — Boolean SAT
 - [ ] M9 — fuzzy solvers
 - [ ] M10 — spatial geometry & geometric constraint solving
@@ -278,9 +278,9 @@ black-formatted (line length 100).
 - **Acceptance:** ported assertions pass; examples run clean.
 
 ### M7 — Symbolic variables & multi TCSP
-- [ ] `metacsp/multi/symbols/` (`SymbolicVariableConstraintSolver` et al.),
+- [x] `metacsp/multi/symbols/` (`SymbolicVariableConstraintSolver` et al.),
       `metacsp/multi/tcsp/`.
-- [ ] `tests/test_symbols.py` from the symbolic-variable examples; port remaining
+- [x] `tests/test_symbols.py` from the symbolic-variable examples; port remaining
       `examples/multi/*.java` touching these modules.
 - **Acceptance:** tests and examples green.
 
