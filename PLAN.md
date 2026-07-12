@@ -17,7 +17,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M8 — Boolean SAT
 - [x] M9 — fuzzy solvers
 - [x] M10 — spatial geometry & geometric constraint solving
-- [ ] M11 — RCC, cardinal, reachability
+- [x] M11 — RCC, cardinal, reachability
 - [ ] M12 — DE9IM spatial relations
 - [ ] M13 — rectangle, block & temporal-rectangle algebras
 - [ ] M14 — trajectory envelopes
