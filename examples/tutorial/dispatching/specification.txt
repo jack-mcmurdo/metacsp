@@ -1,0 +1,25 @@
+# FORMAT:
+# (Variable variable_id symbol+ component)
+# (Constraint type variable_id variable_id [lb,ub]*)
+# please see the AllenIntervalConstraint Javadoc entry for more info on constraint types and bounds
+
+# A MiR does two things: goto_ur and goto_delivery
+# A UR does one thing: place_obj onto a MiR
+# There is one MiR component and one UR component
+
+
+
+(Variable v1 goto_ur MiR)
+(Variable v2 goto_delivery MiR) 
+(Variable v3 place_obj UR)
+
+# All activities have a min duration of 4 sec and unbounded max duration
+(Constraint Duration v1 v1 [4000,INF])
+(Constraint Duration v2 v2 [4000,INF])
+(Constraint Duration v3 v3 [4000,INF])
+
+# MiR has to be finished with goto_ur before UR starts palce_obj  
+(Constraint Before v1 v3)
+
+# UR has to have finished place_obj before MiR can start goto_delivery
+(Constraint Before v3 v2)

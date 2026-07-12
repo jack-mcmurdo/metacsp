@@ -36,7 +36,13 @@ Runnable demos live in `examples/` — plain, standalone Python scripts, e.g.:
 
 ```bash
 python examples/test_apsp_solver.py
+python examples/tutorial/dispatching/simple_dispatching_example.py  # interactive
 ```
+
+`examples/tutorial/` ports the demos of the separate
+[meta-csp-tutorial](https://github.com/FedericoPecora/meta-csp-tutorial) repo — end-to-end
+trajectory-envelope coordination, dispatching, and proactive-planning scenarios that exercise
+the library the way a robot integration would.
 
 `examples/SKIPPED.md` lists the handful of upstream Java examples that could not be
 meaningfully ported (Swing-only, dead upstream code, or missing fixtures), each with a
