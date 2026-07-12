@@ -2,8 +2,8 @@
 
 The Java original visualizes progression forever via
 ``TimelineVisualizer.startAutomaticUpdate`` (Swing) -- replaced here by a
-bounded ``metacsp.viz.timeline.TimelineWindow`` refresh loop (M21) so the
-example exits instead of blocking forever like the Java GUI does.
+bounded ``metacsp.viz.serve`` run so the example exits instead of blocking
+forever like the Java GUI does.
 """
 
 from __future__ import annotations
@@ -21,8 +21,7 @@ from metacsp.meta.simple_planner.simple_planner_inference_callback import (
 from metacsp.multi.activity.activity_network_solver import ActivityNetworkSolver
 from metacsp.sensing.constraint_network_animator import ConstraintNetworkAnimator
 from metacsp.sensing.sensor import Sensor
-from metacsp.viz.app import VizApp
-from metacsp.viz.timeline import TimelineWindow
+from metacsp.viz import serve
 
 DOMAIN_FILE = (
     Path(__file__).resolve().parents[2]
@@ -33,7 +32,6 @@ DOMAIN_FILE = (
 )
 SENSOR_TRACES_DIR = Path(__file__).resolve().parents[2] / "tests" / "data" / "sensorTraces"
 _RUN_SECONDS = 5.0
-_REFRESH_INTERVAL_S = 0.5
 
 
 def main() -> None:
@@ -49,31 +47,28 @@ def main() -> None:
     sensor_a.register_sensor_trace(str(SENSOR_TRACES_DIR / "location.st"))
     sensor_b.register_sensor_trace(str(SENSOR_TRACES_DIR / "stove.st"))
 
-    app = VizApp(title="TestProactivePlanning")
-    window = TimelineWindow(
-        ans.constraint_network,
-        [
-            "Time",
-            "Location",
-            "Stove",
-            "Human",
-            "Robot",
-            "LocalizationService",
-            "RFIDReader",
-            "LaserScanner",
-        ],
-    )
-    app.create()
-    window.build(app)
-    window.attach()
     try:
-        deadline = time.monotonic() + _RUN_SECONDS
-        while time.monotonic() < deadline:
-            window.refresh()
-            time.sleep(_REFRESH_INTERVAL_S)
+        server = serve(
+            ans,
+            [
+                "Time",
+                "Location",
+                "Stove",
+                "Human",
+                "Robot",
+                "LocalizationService",
+                "RFIDReader",
+                "LaserScanner",
+            ],
+        )
+    except RuntimeError as exc:
+        print(f"(visualization unavailable: {exc})")
+        server = None
+    try:
+        time.sleep(_RUN_SECONDS)
     finally:
-        window.destroy()
-        app.destroy()
+        if server is not None:
+            server.stop()
         animator.teardown()
 
 

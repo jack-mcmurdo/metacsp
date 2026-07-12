@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "metacsp"
-version = "1.0.0"
+version = "1.1.0"
 description = "Python port of the Meta-CSP Framework: meta-CSP based hybrid temporal, spatial, and resource constraint reasoning"
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,9 +20,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-viz = ["dearpygui>=1.11"]
-dev = ["pytest>=7", "black>=24", "dearpygui>=1.11"]
+viz = ["starlette>=0.37", "uvicorn>=0.29"]
+dev = ["pytest>=7", "black>=24", "starlette>=0.37", "uvicorn>=0.29", "httpx>=0.27"]
 docs = ["mkdocs-material>=9.5", "mkdocstrings[python]>=0.24"]
+
+[tool.hatch.build]
+artifacts = ["src/metacsp/viz/static/"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/metacsp"]

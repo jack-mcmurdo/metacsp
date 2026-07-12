@@ -2,12 +2,14 @@
 
 The Java original also draws the constraint network
 (``ConstraintNetwork.draw``, ``planner.draw()`` -- Swing, not ported, see
-D10) and publishes a one-shot timeline image; replaced here by one
-``metacsp.viz.timeline.TimelineWindow`` refresh (M21).
+D10) and publishes a one-shot timeline image; replaced here by a bounded
+``metacsp.viz.serve`` run so a human can look at the final state in a
+browser tab.
 """
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import cast
 
@@ -19,12 +21,12 @@ from metacsp.multi.activity.symbolic_variable_activity import SymbolicVariableAc
 from metacsp.multi.allen_interval.allen_interval_constraint import AllenIntervalConstraint
 from metacsp.time.apsp_solver import APSPSolver
 from metacsp.time.bounds import Bounds
-from metacsp.viz.app import VizApp
-from metacsp.viz.timeline import TimelineWindow
+from metacsp.viz import serve
 
 DOMAIN_FILE = (
     Path(__file__).resolve().parents[2] / "tests" / "data" / "domains" / "testProactivePlanning.ddl"
 )
+_RUN_SECONDS = 5.0
 
 
 def main() -> None:
@@ -74,26 +76,27 @@ def main() -> None:
 
     print("Solved?", planner.backtrack())
 
-    app = VizApp(title="TestContextInferenceWithSimplePlanner")
-    window = TimelineWindow(
-        ground_solver.constraint_network,
-        [
-            "Human",
-            "Location",
-            "Stove",
-            "Robot",
-            "LocalizationService",
-            "LaserScanner",
-            "RFIDReader",
-        ],
-    )
-    app.create()
-    window.build(app)
     try:
-        window.refresh()
+        server = serve(
+            ground_solver,
+            [
+                "Human",
+                "Location",
+                "Stove",
+                "Robot",
+                "LocalizationService",
+                "LaserScanner",
+                "RFIDReader",
+            ],
+        )
+    except RuntimeError as exc:
+        print(f"(visualization unavailable: {exc})")
+        server = None
+    try:
+        time.sleep(_RUN_SECONDS)
     finally:
-        window.destroy()
-        app.destroy()
+        if server is not None:
+            server.stop()
 
 
 if __name__ == "__main__":

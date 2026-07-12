@@ -3,12 +3,12 @@
 The Java original also drives a live Swing timeline (``TimelinePublisher``/
 ``TimelineVisualizer``) and constraint-network viewer
 (``ConstraintNetwork.draw``); replaced here by a bounded
-``metacsp.viz.timeline.TimelineWindow`` refresh (M21) rather than an
-indefinitely-open Swing window.
+``metacsp.viz.serve`` run rather than an indefinitely-open Swing window.
 """
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import cast
 
@@ -19,8 +19,7 @@ from metacsp.multi.activity.symbolic_variable_activity import SymbolicVariableAc
 from metacsp.multi.allen_interval.allen_interval_constraint import AllenIntervalConstraint
 from metacsp.time.apsp_solver import APSPSolver
 from metacsp.time.bounds import Bounds
-from metacsp.viz.app import VizApp
-from metacsp.viz.timeline import TimelineWindow
+from metacsp.viz import serve
 
 DOMAIN_FILE = (
     Path(__file__).resolve().parents[2]
@@ -29,6 +28,7 @@ DOMAIN_FILE = (
     / "domains"
     / "testCausalPlanningDomain.ddl"
 )
+_RUN_SECONDS = 5.0
 
 
 def main() -> None:
@@ -63,18 +63,18 @@ def main() -> None:
 
     print("Solved?", planner.backtrack())
 
-    app = VizApp(title="TestCausalPlanning")
-    window = TimelineWindow(
-        ground_solver.constraint_network,
-        ["Robot", "LocalizationService", "RFIDReader", "LaserScanner"],
-    )
-    app.create()
-    window.build(app)
     try:
-        window.refresh()
+        server = serve(
+            ground_solver, ["Robot", "LocalizationService", "RFIDReader", "LaserScanner"]
+        )
+    except RuntimeError as exc:
+        print(f"(visualization unavailable: {exc})")
+        server = None
+    try:
+        time.sleep(_RUN_SECONDS)
     finally:
-        window.destroy()
-        app.destroy()
+        if server is not None:
+            server.stop()
 
 
 if __name__ == "__main__":

@@ -10,9 +10,8 @@ Python ports are intentionally near-duplicates, one per oracle repo,
 matching their (also duplicate) Java sources.
 
 The Java original visualizes progression forever via
-``TimelineVisualizer.startAutomaticUpdate`` (Swing) -- replaced here by
-M21's ``metacsp.viz.timeline.TimelineWindow`` (dearpygui), attached to
-live-redraw on every D2 change event. The "poor man's key listener" `while
+``TimelineVisualizer.startAutomaticUpdate`` (Swing) -- replaced here by the
+browser-based ``metacsp.viz.serve``. The "poor man's key listener" `while
 True` stdin loop is preserved as-is (meant to be run and typed into by a
 newcomer); ``input()`` raises ``EOFError`` on closed stdin (where Java's
 ``BufferedReader.readLine()`` would return ``null``), caught here to exit
@@ -35,8 +34,7 @@ from metacsp.multi.activity.activity_network_solver import ActivityNetworkSolver
 from metacsp.multi.activity.symbolic_variable_activity import SymbolicVariableActivity
 from metacsp.sensing.constraint_network_animator import ConstraintNetworkAnimator
 from metacsp.sensing.sensor import Sensor
-from metacsp.viz.app import VizApp
-from metacsp.viz.timeline import TimelineWindow
+from metacsp.viz import serve
 
 DOMAIN_FILE = (
     Path(__file__).resolve().parents[3]
@@ -78,11 +76,11 @@ def main() -> None:
     sensor_a.register_sensor_trace(str(SENSOR_TRACES_DIR / "location.st"))
     sensor_b.register_sensor_trace(str(SENSOR_TRACES_DIR / "stove.st"))
 
-    app = VizApp(title="TestProactivePlanningAndDispatching (tutorial)")
-    window = TimelineWindow(ans.constraint_network, ["Time", "Location", "Stove", "Human", "Robot"])
-    app.create()
-    window.build(app)
-    window.attach()
+    try:
+        server = serve(ans, ["Time", "Location", "Stove", "Human", "Robot"])
+    except RuntimeError as exc:
+        print(f"(visualization unavailable: {exc})")
+        server = None
     try:
         while True:
             print("Executing activities (press <enter> to refresh list):")
@@ -102,8 +100,8 @@ def main() -> None:
                 except (ValueError, IndexError):
                     pass
     finally:
-        window.destroy()
-        app.destroy()
+        if server is not None:
+            server.stop()
         animator.teardown()
 
 
