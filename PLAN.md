@@ -26,7 +26,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M17 — trajectory envelope scheduler
 - [x] M18 — hybrid planner
 - [x] M19 — sensing & dispatching
-- [ ] M20 — online monitoring
+- [x] M20 — online monitoring
 - [ ] M21 — serialization, plotting, viz protocol doc
 - [ ] M22 — examples sweep & README
 
