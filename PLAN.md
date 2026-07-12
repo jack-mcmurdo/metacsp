@@ -29,6 +29,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M20 — online monitoring
 - [ ] M21 — serialization, plotting, viz protocol doc
 - [ ] M22 — examples sweep & README
+- [ ] M23 — tutorial demos (meta-csp-tutorial repo)
 
 **Known ordering exception (M6/M7/M8):** while implementing M6, `multi/activity/`'s
 `SymbolicVariableActivity` and `ActivityNetworkSolver` turned out to depend on
@@ -64,6 +65,18 @@ Pinned commit: `6eb822340b2761e65988b1b9529ede7abeca2832`. All Java paths below 
 `/tmp/metacsp-java/src/main/java/org/metacsp/`. When this plan and the Java source disagree on
 behavior, **the Java source wins** — replicate its observable behavior exactly (same
 consistency verdicts, same bounds values, same solver decisions), not its style.
+
+## Tutorial reference source (M23 only, read-only, the demo oracle)
+
+```bash
+git clone --depth 1 https://github.com/FedericoPecora/meta-csp-tutorial /tmp/metacsp-tutorial-java
+```
+
+Pinned commit: `c67e222c0ab882c75d9caf8ccf9a1570848d4f0a`. This is a separate, small demo repo (not
+the framework), maintained by the same author, that exercises the already-ported library
+end-to-end (trajectory-envelope coordination, dispatching, proactive planning). All Java paths
+in M23 are relative to `/tmp/metacsp-tutorial-java/src/main/java/`. Same rule as the framework
+oracle: where this plan and the Java source disagree, the Java source wins.
 
 ## Already scaffolded (M0) — do not recreate
 
@@ -415,6 +428,81 @@ black-formatted (line length 100).
 - [ ] README: replace the “Status” section with a feature table and a quickstart snippet.
 - **Acceptance:** full `pytest` green on 3.10–3.12; `black --check` clean;
   `python examples/<each>.py` exits 0.
+
+### M23 — Tutorial demos (meta-csp-tutorial repo)
+Ports the 8 runnable demo classes of the separate `meta-csp-tutorial` repo (see "Tutorial
+reference source" above), preserving its own Java package layout (`coordination/`,
+`dispatching/`, `planning/`, `util/`) as `examples/tutorial/{coordination,dispatching,planning,
+util}/`, one Python file per Java class, filename = snake_case of the exact class name (C2;
+same convention M22 uses for `examples/`) — no renaming to "friendlier" names.
+
+- [ ] Fixtures: copy `domains/testProactivePlanningLucia.ddl` (unchanged filename) into
+      `tests/data/domains/`. `sensorTraces/location.st`, `sensorTraces/stove.st` and
+      `paths/newpath{1,2,3}.path` are already present in `tests/data/{sensorTraces,paths}/`,
+      byte-identical to the tutorial repo's copies (diffed and confirmed) — do not recopy.
+      Copy `specification.txt` and `specification2.txt` (unchanged) into
+      `examples/tutorial/dispatching/`. Do **not** copy `domains/testProactivePlanningRobots.ddl`,
+      `specification_mir_1.txt`, `specification_mir_2.txt` — none is imported/referenced by any
+      of the 8 demo classes (dead fixtures in the tutorial repo itself; same treatment as this
+      plan's own Skip list).
+- [ ] Not ported (dead code in the tutorial repo — no demo class imports them):
+      `util/Component.java`, `util/ExampleComponent.java`, `util/ActivityCallback.java`.
+- [ ] `examples/tutorial/util/multi_list_parser.py`: port `util/MultiListParser.java` — class
+      `MultiListParser(to_parse: str)`, method `parse_objects()`, private recursive helper
+      `parse()`, per C2 (plain camelCase → snake_case, no access-modifier prefix invented).
+- [ ] `examples/tutorial/util/parsing.py`: port `util/Parsing.java` — module-level functions
+      `set_variable_factory(solver)`, `parse_specification(spec) -> ConstraintNetwork`,
+      `load_specification(filename) -> ConstraintNetwork`, `make_constraint(objs)`,
+      `make_variable(objs)`, `process_bounds(bounds)`, and module state `ans`, `ids_to_vars`,
+      `specification_counter` (Java `static` fields → Python module globals). This is
+      demo-support code (a spec-file mini-language reader used only by the tutorial demos), not
+      library code — it is not added to the Module map.
+- [ ] `examples/tutorial/coordination/test_trajectory_envelope_representation_three_robots.py`
+      (← `TestTrajectoryEnvelopeRepresentationThreeRobots.java`),
+      `test_trajectory_envelope_refinement.py` (← `TestTrajectoryEnvelopeRefinement.java`),
+      `test_trajectory_envelope_scheduling.py` (← `TestTrajectoryEnvelopeScheduling.java`),
+      `test_trajectory_envelope_control.py` (← `TestTrajectoryEnvelopeControl.java`): port the
+      trajectory-envelope construction/refinement/scheduling/dispatching logic; resolve
+      `paths/newpath{1,2,3}.path` against `tests/data/paths/` per the precedent in
+      `examples/meta/test_trajectory_envelope_scheduler.py`. Drop `JTSDrawingPanel`,
+      `ConstraintNetwork.draw`, and `TrajectoryEnvelopeAnimator` calls (Swing, not ported — same
+      drop-Swing-keep-logic treatment M22 already applies when porting the framework's own
+      `TestTrajectoryEnvelopeScheduler*.java`); keep all `System.out.println` output as `print`.
+      None of these four Java originals reads `System.in` — each runs to completion and exits.
+- [ ] `examples/tutorial/dispatching/simple_dispatching_example_manual_specification.py` (←
+      `SimpleDispatchingExampleManualSpecification.java`, builds its `ActivityNetworkSolver`
+      network from explicit constraints, no parsing), `simple_dispatching_example.py` (←
+      `SimpleDispatchingExample.java`, using `util/parsing.py` +
+      `examples/tutorial/dispatching/specification.txt`),
+      `simple_dispatching_and_scheduling_example.py` (←
+      `SimpleDispatchingAndSchedulingExample.java`, using `util/parsing.py` +
+      `examples/tutorial/dispatching/specification2.txt`) and
+      `examples/tutorial/planning/test_proactive_planning_and_dispatching.py` (←
+      `TestProactivePlanningAndDispatching.java`, using
+      `tests/data/domains/testProactivePlanningLucia.ddl` and the existing
+      `tests/data/sensorTraces/{location,stove}.st`): each replaces
+      `TimelinePublisher`/`TimelineVisualizer` with M21's `metacsp.viz.timeline` (the in-scope
+      dearpygui replacement) and keeps the "poor man's key listener" interactive `while True`
+      stdin loop as-is (these are meant to be run and typed into by a newcomer). Each of these
+      4 files inserts its own directory's parent onto `sys.path` at import time
+      (`sys.path.insert(0, str(Path(__file__).resolve().parents[1]))`) so
+      `from util.parsing import ...` resolves `examples/tutorial/util/` — the same pattern
+      Java's `import util.Parsing;` cross-package import expresses, without adding
+      `__init__.py`/packaging machinery elsewhere in `examples/` (no other milestone needs it).
+      Catch `EOFError` around the `input()` call in the stdin loop (Python's `input()` raises
+      `EOFError` on closed stdin, where Java's `BufferedReader.readLine()` returns `null`) and
+      `break` out of the loop cleanly instead of letting it propagate.
+- [ ] `tests/test_tutorial_examples.py`: for each of the 8 demo scripts, run
+      `subprocess.run([sys.executable, <path>], input="", capture_output=True, timeout=15)` from
+      the repo root and assert `returncode == 0` (the 4 coordination demos exit on their own; the
+      4 interactive demos exit via the `EOFError` break on the immediately-closed empty stdin).
+      Assert each dispatching/planning demo's stdout contains its printed consistency line
+      (`"Constraints consistent? True"` or, for `simple_dispatching_and_scheduling_example.py`
+      and the planning demo, the analogous `"Solved? True"`/consistency line from the Java
+      original).
+- **Acceptance:** `pytest tests/test_tutorial_examples.py` green; running any of the 4
+  interactive demos manually (`python examples/tutorial/.../<name>.py`) reaches the input prompt
+  without a traceback and a live `metacsp.viz.timeline` window.
 
 ## Edge cases & risks
 
