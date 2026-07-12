@@ -14,7 +14,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M5 — temporal core (time, time.qualitative)
 - [ ] M6 — Allen intervals & activities
 - [ ] M7 — symbolic variables & multi TCSP
-- [ ] M8 — Boolean SAT
+- [x] M8 — Boolean SAT
 - [ ] M9 — fuzzy solvers
 - [ ] M10 — spatial geometry & geometric constraint solving
 - [ ] M11 — RCC, cardinal, reachability
@@ -285,8 +285,8 @@ black-formatted (line length 100).
 - **Acceptance:** tests and examples green.
 
 ### M8 — Boolean SAT
-- [ ] `metacsp/boolean_sat/` per D5/D6.
-- [ ] Port Java `tests/TestBooleanSAT.java` → pytest; port the 9
+- [x] `metacsp/boolean_sat/` per D5/D6.
+- [x] Port Java `tests/TestBooleanSAT.java` → pytest; port the 9
       `examples/TestBooleanSatisfiabilitySolver*.java`.
 - **Acceptance:** SAT/UNSAT verdicts match the Java assertions.
 
