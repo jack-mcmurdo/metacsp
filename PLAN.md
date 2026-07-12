@@ -29,7 +29,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M20 — online monitoring
 - [x] M21 — serialization, plotting, viz protocol doc
 - [x] M22 — examples sweep & README
-- [ ] M23 — tutorial demos (meta-csp-tutorial repo)
+- [x] M23 — tutorial demos (meta-csp-tutorial repo)
 
 **Known ordering exception (M6/M7/M8):** while implementing M6, `multi/activity/`'s
 `SymbolicVariableActivity` and `ActivityNetworkSolver` turned out to depend on
@@ -436,7 +436,7 @@ reference source" above), preserving its own Java package layout (`coordination/
 util}/`, one Python file per Java class, filename = snake_case of the exact class name (C2;
 same convention M22 uses for `examples/`) — no renaming to "friendlier" names.
 
-- [ ] Fixtures: copy `domains/testProactivePlanningLucia.ddl` (unchanged filename) into
+- [x] Fixtures: copy `domains/testProactivePlanningLucia.ddl` (unchanged filename) into
       `tests/data/domains/`. `sensorTraces/location.st`, `sensorTraces/stove.st` and
       `paths/newpath{1,2,3}.path` are already present in `tests/data/{sensorTraces,paths}/`,
       byte-identical to the tutorial repo's copies (diffed and confirmed) — do not recopy.
@@ -445,19 +445,19 @@ same convention M22 uses for `examples/`) — no renaming to "friendlier" names.
       `specification_mir_1.txt`, `specification_mir_2.txt` — none is imported/referenced by any
       of the 8 demo classes (dead fixtures in the tutorial repo itself; same treatment as this
       plan's own Skip list).
-- [ ] Not ported (dead code in the tutorial repo — no demo class imports them):
+- [x] Not ported (dead code in the tutorial repo — no demo class imports them):
       `util/Component.java`, `util/ExampleComponent.java`, `util/ActivityCallback.java`.
-- [ ] `examples/tutorial/util/multi_list_parser.py`: port `util/MultiListParser.java` — class
+- [x] `examples/tutorial/util/multi_list_parser.py`: port `util/MultiListParser.java` — class
       `MultiListParser(to_parse: str)`, method `parse_objects()`, private recursive helper
       `parse()`, per C2 (plain camelCase → snake_case, no access-modifier prefix invented).
-- [ ] `examples/tutorial/util/parsing.py`: port `util/Parsing.java` — module-level functions
+- [x] `examples/tutorial/util/parsing.py`: port `util/Parsing.java` — module-level functions
       `set_variable_factory(solver)`, `parse_specification(spec) -> ConstraintNetwork`,
       `load_specification(filename) -> ConstraintNetwork`, `make_constraint(objs)`,
       `make_variable(objs)`, `process_bounds(bounds)`, and module state `ans`, `ids_to_vars`,
       `specification_counter` (Java `static` fields → Python module globals). This is
       demo-support code (a spec-file mini-language reader used only by the tutorial demos), not
       library code — it is not added to the Module map.
-- [ ] `examples/tutorial/coordination/test_trajectory_envelope_representation_three_robots.py`
+- [x] `examples/tutorial/coordination/test_trajectory_envelope_representation_three_robots.py`
       (← `TestTrajectoryEnvelopeRepresentationThreeRobots.java`),
       `test_trajectory_envelope_refinement.py` (← `TestTrajectoryEnvelopeRefinement.java`),
       `test_trajectory_envelope_scheduling.py` (← `TestTrajectoryEnvelopeScheduling.java`),
@@ -469,7 +469,7 @@ same convention M22 uses for `examples/`) — no renaming to "friendlier" names.
       drop-Swing-keep-logic treatment M22 already applies when porting the framework's own
       `TestTrajectoryEnvelopeScheduler*.java`); keep all `System.out.println` output as `print`.
       None of these four Java originals reads `System.in` — each runs to completion and exits.
-- [ ] `examples/tutorial/dispatching/simple_dispatching_example_manual_specification.py` (←
+- [x] `examples/tutorial/dispatching/simple_dispatching_example_manual_specification.py` (←
       `SimpleDispatchingExampleManualSpecification.java`, builds its `ActivityNetworkSolver`
       network from explicit constraints, no parsing), `simple_dispatching_example.py` (←
       `SimpleDispatchingExample.java`, using `util/parsing.py` +
@@ -492,7 +492,7 @@ same convention M22 uses for `examples/`) — no renaming to "friendlier" names.
       Catch `EOFError` around the `input()` call in the stdin loop (Python's `input()` raises
       `EOFError` on closed stdin, where Java's `BufferedReader.readLine()` returns `null`) and
       `break` out of the loop cleanly instead of letting it propagate.
-- [ ] `tests/test_tutorial_examples.py`: for each of the 8 demo scripts, run
+- [x] `tests/test_tutorial_examples.py`: for each of the 8 demo scripts, run
       `subprocess.run([sys.executable, <path>], input="", capture_output=True, timeout=15)` from
       the repo root and assert `returncode == 0` (the 4 coordination demos exit on their own; the
       4 interactive demos exit via the `EOFError` break on the immediately-closed empty stdin).
