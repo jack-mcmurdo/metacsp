@@ -10,6 +10,8 @@ __all__ = ["Mat2"]
 
 
 class Mat2:
+    """A 2x2 transformation matrix, used for rotating Polygon vertices."""
+
     def __init__(self, *args: float) -> None:
         self.m00 = self.m01 = self.m10 = self.m11 = 0.0
         if len(args) == 1:

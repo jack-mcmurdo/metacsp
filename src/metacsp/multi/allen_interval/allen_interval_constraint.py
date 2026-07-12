@@ -83,6 +83,7 @@ class AllenIntervalConstraint(MultiBinaryConstraint):
         DisjunctionRelation = ()
 
         def get_default_bounds(self) -> list[Bounds]:
+            """This relation's default metric bounds (one Bounds per parameter)."""
             return self.default_interval_bounds
 
         @staticmethod
@@ -132,6 +133,8 @@ class AllenIntervalConstraint(MultiBinaryConstraint):
     def create_internal_constraints_from_to(
         self, from_: Variable, to: Variable
     ) -> list[Constraint] | None:
+        """Compile this Allen relation (qualitative, or a disjunction) to
+        SimpleDistanceConstraints between the two intervals' start/end TimePoints."""
         from metacsp.multi.allen_interval.allen_interval import AllenInterval
 
         if not (isinstance(from_, AllenInterval) and isinstance(to, AllenInterval)):
@@ -413,6 +416,7 @@ class AllenIntervalConstraint(MultiBinaryConstraint):
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         ret = "[" + ", ".join(t.name for t in self.types) + "]"
         if len(self.types) == 1:
             for b in self.bounds:
@@ -423,6 +427,7 @@ class AllenIntervalConstraint(MultiBinaryConstraint):
         return ret
 
     def clone(self) -> AllenIntervalConstraint:
+        """Return an independent copy of this constraint."""
         if len(self.types) > 1:
             r = AllenIntervalConstraint(*self.types)
         else:
@@ -431,6 +436,7 @@ class AllenIntervalConstraint(MultiBinaryConstraint):
         return r
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """True iff ``c`` expresses the same relation(s) between the same interval pair."""
         ac = cast(AllenIntervalConstraint, c)
         if len(self.types) > 1:
             return all(t in ac.types for t in self.types)

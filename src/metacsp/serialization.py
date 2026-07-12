@@ -52,6 +52,7 @@ def constraint_to_dict(c: Constraint) -> dict[str, Any]:
 
 
 def network_to_dict(net: ConstraintNetwork) -> dict[str, Any]:
+    """``{"variables": [...], "constraints": [...]}``: a full snapshot of the network."""
     return {
         "variables": [variable_to_dict(v) for v in net.get_variables()],
         "constraints": [constraint_to_dict(c) for c in net.get_constraints()],
@@ -120,9 +121,11 @@ class SnapshotPublisher:
         self.constraint_network.add_change_listener(self._on_change)
 
     def start(self) -> None:
+        """Start the background publishing thread."""
         self._thread.start()
 
     def teardown(self) -> None:
+        """Stop the background publishing thread and unregister the change listener."""
         self._teardown = True
         self.constraint_network.remove_change_listener(self._on_change)
 

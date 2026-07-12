@@ -14,6 +14,9 @@ __all__ = ["ReachabilityConstraint"]
 
 
 class ReachabilityConstraint(BinaryConstraint):
+    """A binary constraint stating that a configuration is reachable relative to
+    another, for a given reachability purpose."""
+
     class Type(Enum):
         none = 0
         activityReachable = 1

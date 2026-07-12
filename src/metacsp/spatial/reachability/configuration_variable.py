@@ -15,6 +15,8 @@ __all__ = ["ConfigurationVariable"]
 
 
 class ConfigurationVariable(Variable):
+    """A variable representing a robot configuration, for reachability reasoning."""
+
     def __init__(self, cs: ConstraintSolver, id: int) -> None:
         super().__init__(cs, id)
         self._dom: Domain | None = None

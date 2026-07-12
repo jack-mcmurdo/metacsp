@@ -35,20 +35,25 @@ class BooleanDomain(Domain):
         self.set_default_value_choice_function("model0")
 
     def allow_true(self) -> None:
+        """Allow True as a value of this domain."""
         self.domain[0] = True
 
     def allow_false(self) -> None:
+        """Allow False as a value of this domain."""
         self.domain[1] = True
 
     @property
     def can_be_true(self) -> bool:
+        """True iff True is currently an allowed value."""
         return self.domain[0]
 
     @property
     def can_be_false(self) -> bool:
+        """True iff False is currently an allowed value."""
         return self.domain[1]
 
     def compare_to(self, o: object) -> int:
+        """Ordering comparison favoring the more constrained (fewer allowed values) domain."""
         if not isinstance(o, BooleanDomain):
             return 0
         counter_this = int(self.domain[0]) + int(self.domain[1])

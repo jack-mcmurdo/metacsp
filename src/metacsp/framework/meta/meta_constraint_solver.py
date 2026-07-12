@@ -77,6 +77,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
     # --- meta-constraints ---
 
     def add_meta_constraint(self, meta_constraint: MetaConstraint) -> None:
+        """Register a MetaConstraint with this solver, extending its constraint types."""
         self.meta_constraints.append(meta_constraint)
         meta_constraint.set_meta_solver(self)
         found = any(cl is type(meta_constraint) for cl in self.constraint_types)
@@ -84,12 +85,15 @@ class MetaConstraintSolver(MultiConstraintSolver):
             self.constraint_types = self.constraint_types + [type(meta_constraint)]
 
     def get_meta_constraint(self, meta_variable: ConstraintNetwork) -> MetaConstraint | None:
+        """The MetaConstraint that resolved the given meta-variable, if any."""
         return self.meta_vars_to_meta_cons.get(meta_variable)
 
     def get_added_resolvers(self) -> list[ConstraintNetwork]:
+        """The meta-values currently posted as resolvers."""
         return list(self.resolvers.values())
 
     def retract_resolvers(self) -> None:
+        """Retract every currently posted resolver."""
         for var, value in list(self.resolvers.items()):
             self.logger.debug("=== ||| === Retracting value: %s", value.get_constraints())
             self.retract_resolver(var, value)
@@ -98,6 +102,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         self.meta_vars_to_meta_cons.clear()
 
     def clear_resolvers(self) -> None:
+        """Forget the currently posted resolvers without retracting their constraints."""
         self.resolvers = {}
         self.meta_vars_to_meta_cons = {}
 
@@ -141,6 +146,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
 
     @property
     def time_out(self) -> bool:
+        """True iff the last search was interrupted by a timeout."""
         return self._timeout
 
     def _backtrack_helper(self, meta_variable: MetaVariable) -> bool:
@@ -298,6 +304,11 @@ class MetaConstraintSolver(MultiConstraintSolver):
     def add_resolver(
         self, meta_var_constraint_network: ConstraintNetwork, resolver_network: ConstraintNetwork
     ) -> bool:
+        """Post a meta-value's constraints to the relevant ground solvers.
+
+        Returns True iff the meta-value's constraints were consistent with the ground CSP
+        (in which case they are now posted); rolls back and returns False otherwise.
+        """
         if not self.add_resolver_sub(meta_var_constraint_network, resolver_network):
             return False
         solvers_to_constraints: dict[ConstraintSolver, list[Constraint]] = {}
@@ -315,6 +326,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         return True
 
     def retract_resolver(self, meta_var: ConstraintNetwork, res: ConstraintNetwork) -> None:
+        """Retract a previously posted meta-value's constraints from the ground solvers."""
         self.logger.debug("Retracting resolver:")
         self.logger.debug("  MetaVariable: %s", meta_var)
         self.logger.debug("  MetaValue: %s", res)
@@ -329,6 +341,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         self.logger.debug("Done retracting resolver.")
 
     def propagate(self) -> bool:
+        """No-op: propagation for meta-CSPs happens via :meth:`backtrack`, not this hook."""
         return False
 
     @abstractmethod
@@ -347,6 +360,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         ground-CSP (if False, the ground-CSP is left unchanged)."""
 
     def get_ground_variables(self) -> dict[ConstraintSolver, list[Variable]]:
+        """All Variables of each ground solver, keyed by that solver."""
         return {cs: cs.get_variables() for cs in self.constraint_solvers}
 
     def draw(self) -> None:
@@ -364,6 +378,10 @@ class MetaConstraintSolver(MultiConstraintSolver):
     # --- branch and bound (limited support for constraint optimization) ---
 
     def branch_and_bound(self) -> bool:
+        """Backtracking search with branch-and-bound pruning for constraint optimization.
+
+        Returns True iff a set of assignments satisfying the MetaConstraints was found.
+        """
         self.g = DelegateTree()
         self.logger.info("Starting search...")
         con = self._get_conflict()
@@ -436,24 +454,38 @@ class MetaConstraintSolver(MultiConstraintSolver):
         return False
 
     @abstractmethod
-    def get_upper_bound(self) -> float: ...
+    def get_upper_bound(self) -> float:
+        """Current upper bound on the objective, used by :meth:`branch_and_bound`."""
+        ...
 
     @abstractmethod
-    def set_upper_bound(self) -> None: ...
+    def set_upper_bound(self) -> None:
+        """Recompute the upper bound after posting a new resolver."""
+        ...
 
     @abstractmethod
-    def get_lower_bound(self) -> float: ...
+    def get_lower_bound(self) -> float:
+        """Current lower bound on the objective, used by :meth:`branch_and_bound`."""
+        ...
 
     @abstractmethod
-    def set_lower_bound(self) -> None: ...
+    def set_lower_bound(self) -> None:
+        """Recompute the lower bound once a complete solution is found."""
+        ...
 
     @abstractmethod
-    def has_conflict_clause(self, meta_value: ConstraintNetwork) -> bool: ...
+    def has_conflict_clause(self, meta_value: ConstraintNetwork) -> bool:
+        """True iff the given meta-value is already known (via a conflict clause) to fail."""
+        ...
 
     @abstractmethod
-    def reset_false_clause(self) -> None: ...
+    def reset_false_clause(self) -> None:
+        """Clear any conflict clauses recorded during the current branch-and-bound node."""
+        ...
 
     def failure_pruning(self, failure_time: int) -> None:
+        """Reset search state (as :meth:`MultiConstraintSolver.failure_pruning`),
+        plus the meta-CSP search tree and resolver bookkeeping."""
         super().failure_pruning(failure_time)
         self.counter_moves = 0
         self.g = DelegateTree()
@@ -464,23 +496,28 @@ class MetaConstraintSolver(MultiConstraintSolver):
 
     @property
     def current_focus_constraint(self) -> FocusConstraint | None:
+        """The FocusConstraint currently restricting search, if any."""
         return self.current_focus
 
     @current_focus_constraint.setter
     def current_focus_constraint(self, focus: FocusConstraint) -> None:
+        """Set the FocusConstraint currently restricting search."""
         self.current_focus = focus
 
     @property
     def focused(self) -> list[Variable] | None:
+        """The Variables in scope of the current focus, if any."""
         if self.current_focus is not None:
             return self.current_focus.scope
         return None
 
     def set_focus(self, *vars: Variable) -> None:
+        """Restrict search to the given Variables, replacing any existing focus."""
         self.current_focus = FocusConstraint()
         self.current_focus.scope = list(vars)
 
     def is_focused(self, var: Variable) -> bool:
+        """True iff the given Variable is in the current focus."""
         if self.current_focus is None:
             return False
         focused = self.focused
@@ -488,6 +525,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         return any(v == var for v in focused)
 
     def focus(self, *vars: Variable) -> None:
+        """Add the given Variables to the current focus, creating one if none exists."""
         if self.current_focus is None:
             self.current_focus = FocusConstraint()
         scope_vars = list(self.current_focus.scope)
@@ -495,6 +533,7 @@ class MetaConstraintSolver(MultiConstraintSolver):
         self.current_focus.scope = scope_vars
 
     def remove_from_current_focus(self, *vars: Variable) -> None:
+        """Remove the given Variables from the current focus."""
         if self.current_focus is None:
             raise NoFocusDefinedException(*vars)
         new_scope = [v_old for v_old in self.current_focus.scope if v_old not in vars]

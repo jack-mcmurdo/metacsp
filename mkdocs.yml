@@ -1,0 +1,115 @@
+site_name: metacsp
+site_description: >-
+  Python port of the Meta-CSP Framework — meta-CSP based hybrid temporal,
+  spatial, and resource constraint reasoning.
+repo_url: https://github.com/jack-mcmurdo/metacsp
+repo_name: jack-mcmurdo/metacsp
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: { icon: material/brightness-7, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: { icon: material/brightness-4, name: Light mode }
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            members_order: source
+            show_root_heading: false
+            show_source: true
+            separate_signature: true
+            show_signature_annotations: true
+            merge_init_into_class: true
+            inherited_members: false
+            filters: ["!^_"]
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Concepts:
+      - concepts/constraint-networks.md
+      - concepts/meta-csp-architecture.md
+      - concepts/temporal-reasoning.md
+      - concepts/allen-interval-algebra.md
+      - concepts/activities-and-timelines.md
+      - concepts/scheduling-and-planning.md
+      - concepts/spatial-reasoning.md
+      - concepts/trajectory-envelopes.md
+      - concepts/sensing-and-dispatching.md
+  - API Reference:
+      - Core framework:
+          - api/exceptions.md
+          - api/utility.md
+          - api/framework.md
+          - api/framework.multi.md
+          - api/framework.meta.md
+      - Temporal:
+          - api/time.md
+          - api/time.qualitative.md
+          - api/multi.allen_interval.md
+          - api/multi.activity.md
+          - api/multi.tcsp.md
+          - api/fuzzy_allen_interval.md
+          - api/multi.fuzzy_activity.md
+          - api/multi.fuzzy_set_activity.md
+      - Symbols & SAT:
+          - api/multi.symbols.md
+          - api/boolean_sat.md
+          - api/fuzzy_symbols.md
+      - Spatial:
+          - api/spatial.geometry.md
+          - api/spatial.rcc.md
+          - api/spatial.cardinal.md
+          - api/spatial.reachability.md
+          - api/spatial.utility.md
+          - api/multi.spatial.de9im.md
+          - api/multi.spatial.rectangle_algebra.md
+          - api/multi.spatial.block_algebra.md
+          - api/multi.temporal_rectangle_algebra.md
+      - Spatio-temporal:
+          - api/multi.spatio_temporal.md
+          - api/multi.spatio_temporal.paths.md
+          - api/meta.spatio_temporal.paths.md
+      - Meta solvers:
+          - api/meta.tcsp.md
+          - api/meta.symbols_and_time.md
+          - api/meta.simple_planner.md
+          - api/meta.fuzzy_activity.md
+          - api/meta.hybrid_planner.md
+      - Runtime:
+          - api/sensing.md
+          - api/dispatching.md
+          - api/online_monitoring.md
+      - Serialization & viz:
+          - api/serialization.md
+          - api/viz.md
+  - Examples:
+      - examples/index.md
+      - examples/stp.md
+      - examples/activities.md
+      - examples/resource-scheduling.md
+      - examples/planning.md
+      - examples/trajectory-envelopes.md
+      - examples/dispatching.md
+  - Visualization: visualization.md
+  - Visualization protocol: VIZ.md

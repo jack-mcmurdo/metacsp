@@ -25,10 +25,12 @@ class SimpleAllenInterval(Variable):
 
     @property
     def domain(self) -> Domain:
+        """This SimpleAllenInterval's Domain."""
         return self._domain
 
     @domain.setter
     def domain(self, d: Domain) -> None:
+        """Set this SimpleAllenInterval's Domain."""
         self._domain = d
 
     def __str__(self) -> str:

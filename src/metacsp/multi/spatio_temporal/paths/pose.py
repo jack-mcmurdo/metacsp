@@ -75,19 +75,23 @@ class Pose:
 
     @property
     def position(self) -> Union[Coordinate2D, Coordinate3D]:
+        """This pose's (x, y) or (x, y, z) coordinate, depending on dimensionality."""
         if math.isnan(self.z):
             return (self.x, self.y)
         return (self.x, self.y, self.z)
 
     def distance_to(self, p: Pose) -> float:
+        """2D Euclidean distance between this pose and ``p``."""
         return _coordinate_distance(p.position, self.position)
 
     @staticmethod
     def lerp(a: float, b: float, ratio: float) -> float:
+        """Linear interpolation between ``a`` and ``b`` at the given ratio in [0, 1]."""
         return (a * (1.0 - ratio)) + (b * ratio)
 
     @staticmethod
     def lerp_degrees(a: float, b: float, ratio: float) -> float:
+        """Linear interpolation between two angles (radians), taking the shorter arc."""
         difference = abs(b - a)
         if difference > math.pi:
             if b > a:
@@ -101,6 +105,7 @@ class Pose:
         return math.fmod(value, range_zero)
 
     def interpolate(self, p2: Pose, ratio: float) -> Pose:
+        """Linearly interpolate between this pose and ``p2`` at the given ratio in [0, 1]."""
         new_x = Pose.lerp(self.x, p2.x, ratio)
         new_y = Pose.lerp(self.y, p2.y, ratio)
         if math.isnan(self.z):
@@ -134,6 +139,7 @@ class Pose:
 
     @property
     def is_pose2d(self) -> bool:
+        """True iff this pose was constructed with only (x, y, theta)."""
         return math.isnan(self.roll) or math.isnan(self.pitch) or math.isnan(self.z)
 
     def __eq__(self, other: object) -> bool:

@@ -32,6 +32,7 @@ class SimpleInterval(Domain):
         return self.interval_name
 
     def compare_to(self, other: object) -> int:
+        """Ordering comparison by interval name."""
         if isinstance(other, SimpleInterval):
             return (self.interval_name > other.interval_name) - (
                 self.interval_name < other.interval_name

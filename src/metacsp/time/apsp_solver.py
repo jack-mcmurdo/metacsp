@@ -440,19 +440,24 @@ class APSPSolver(ConstraintSolver):
     # --- framework interface ---
 
     def create_variables_sub(self, num: int) -> list[Variable] | None:
+        """Allocate ``num`` TimePoints from the pre-sized pool, or None if the pool is exhausted."""
         tp = self._tp_create_batch(num)
         if tp is None:
             return None
         return [self._tpoints[t] for t in tp]
 
     def remove_variables_sub(self, v: list[Variable]) -> None:
+        """Return the given TimePoints to the pool and recompute the distance matrix."""
         ids = [tp.id for tp in v if isinstance(tp, TimePoint)]
         self._tp_delete(ids)
 
     def set_adding_independent_constraints(self) -> None:
+        """Skip incremental propagation for the next batch of added constraints
+        (caller guarantees they are pairwise independent)."""
         self._adding_independent_constraints = True
 
     def add_constraints_sub(self, con: list[Constraint]) -> bool:
+        """Post SimpleDistanceConstraints, propagating incrementally or from scratch."""
         if not con:
             return True
         tot: list[Bounds] = []
@@ -488,6 +493,7 @@ class APSPSolver(ConstraintSolver):
         return True
 
     def remove_constraints_sub(self, con: list[Constraint]) -> None:
+        """Retract SimpleDistanceConstraints and recompute the distance matrix from scratch."""
         if not con:
             return
         tot: list[Bounds] = []
@@ -501,9 +507,11 @@ class APSPSolver(ConstraintSolver):
         self._c_delete(tot, from_, to, False)
 
     def propagate(self) -> bool:
+        """Recompute the full APSP distance matrix; False iff a negative cycle is found."""
         return self._from_scratch_distance_matrix_computation()
 
     def register_value_choice_functions(self) -> None:
+        """Register the "ET"/"LT" (earliest/latest time) value choice functions for Interval."""
         Domain.register_value_choice_function(Interval, _StartValueChoiceFunction(), "ET")
         Domain.register_value_choice_function(Interval, _EndValueChoiceFunction(), "LT")
 
@@ -511,13 +519,16 @@ class APSPSolver(ConstraintSolver):
 
     @property
     def o(self) -> int:
+        """This STP's origin (earliest possible time)."""
         return self._o
 
     @property
     def h(self) -> int:
+        """This STP's horizon (latest possible time)."""
         return self._h
 
     def change_horizon(self, val: int) -> bool:
+        """Change the horizon, re-propagating the Origin-Horizon distance constraint."""
         self.remove_constraint(self._horizon_constraint)
         sdc = SimpleDistanceConstraint()
         sdc.from_ = self.get_variable(0)
@@ -532,13 +543,16 @@ class APSPSolver(ConstraintSolver):
 
     @property
     def source(self) -> TimePoint:
+        """The Origin (O) TimePoint."""
         return self._tpoints[0]
 
     @property
     def sink(self) -> TimePoint:
+        """The Horizon (H) TimePoint."""
         return self._tpoints[1]
 
     def get_time_point(self, id: int) -> TimePoint | None:
+        """The used TimePoint with the given id, or None if unused/out of range."""
         if id >= self._max_tps:
             return None
         if self._tpoints[id] is None:
@@ -550,11 +564,13 @@ class APSPSolver(ConstraintSolver):
     def get_constraint(
         self, tp_from: TimePoint, tp_to: TimePoint
     ) -> SimpleDistanceConstraint | None:
+        """The SimpleDistanceConstraint directly posted between two TimePoints, if any."""
         if self._distance[tp_from.id, tp_to.id] != INF:
             return self._tpoints[tp_from.id].get_out(tp_to.id)
         return None
 
     def get_distance_bounds(self, tp_from: TimePoint, tp_to: TimePoint) -> Bounds:
+        """The propagated [min, max] distance bounds between two TimePoints."""
         max_ = int(self._distance[tp_from.id, tp_to.id])
         min_ = int(-self._distance[tp_to.id, tp_from.id])
         return Bounds(min_, max_)
@@ -587,6 +603,7 @@ class APSPSolver(ConstraintSolver):
         return math.sqrt(sigma * (2.0 / (n * (n + 1))))
 
     def bookmark(self) -> int:
+        """Snapshot the current distance matrix and TimePoints; return the bookmark's index."""
         tp_snapshot = [tp.clone() for tp in self._tpoints]
         self._distance_rollback.append(self._distance.copy())
         self._tpoints_rollback.append(tp_snapshot)
@@ -594,11 +611,13 @@ class APSPSolver(ConstraintSolver):
         return len(self._distance_rollback) - 1
 
     def remove_bookmark(self, i: int) -> None:
+        """Discard the bookmark at the given index without reverting to it."""
         del self._distance_rollback[i]
         del self._tpoints_rollback[i]
         del self._max_used_rollback[i]
 
     def revert(self, i: int) -> None:
+        """Restore the state saved by :meth:`bookmark` at index ``i``, discarding later ones."""
         self._distance = self._distance_rollback[i]
         self._tpoints = self._tpoints_rollback[i]
         self._max_used = self._max_used_rollback[i]
@@ -609,15 +628,18 @@ class APSPSolver(ConstraintSolver):
 
     @property
     def num_bookmarks(self) -> int:
+        """Number of bookmarks currently saved."""
         return len(self._distance_rollback)
 
     def get_equal_time_point(self, query_tp: TimePoint) -> TimePoint | None:
+        """The TimePoint in this solver equal to ``query_tp``, if any."""
         for tp in self._tpoints:
             if tp == query_tp:
                 return tp
         return None
 
     def print_dist(self) -> str:
+        """Render the current distance matrix as a grid of strings, for debugging."""
         s = ""
         for i in range(self._max_used + 1):
             for j in range(self._max_used + 1):
@@ -626,6 +648,7 @@ class APSPSolver(ConstraintSolver):
         return s
 
     def print_dist_hist(self) -> str:
+        """Render every bookmarked distance matrix as a grid of strings, for debugging."""
         s = ""
         for ci, dist in enumerate(self._distance_rollback):
             s += "=============================\n"

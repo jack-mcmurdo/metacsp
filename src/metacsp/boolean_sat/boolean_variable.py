@@ -23,9 +23,11 @@ class BooleanVariable(Variable):
         self._domain: Domain = BooleanDomain(self, True, True)
 
     def allow_true(self) -> None:
+        """Allow True as a value of this variable's domain."""
         cast(BooleanDomain, self.domain).allow_true()
 
     def allow_false(self) -> None:
+        """Allow False as a value of this variable's domain."""
         cast(BooleanDomain, self.domain).allow_false()
 
     def __lt__(self, other: Variable) -> bool:
@@ -37,10 +39,12 @@ class BooleanVariable(Variable):
 
     @property
     def domain(self) -> Domain:
+        """This variable's BooleanDomain."""
         return self._domain
 
     @domain.setter
     def domain(self, d: Domain) -> None:
+        """Set this variable's Domain."""
         self._domain = d
 
     def __str__(self) -> str:

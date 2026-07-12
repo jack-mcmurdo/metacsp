@@ -23,6 +23,7 @@ class LatestStartTimeVarOH(VariableOrderingH):
     """
 
     def compare(self, n1: ConstraintNetwork, n2: ConstraintNetwork) -> int:
+        """Negative/zero/positive as ``n1``'s Activity starts after/with/before ``n2``'s."""
         time1 = cast(SymbolicVariableActivity, n1.get_variables()[0]).temporal_variable.est
         time2 = cast(SymbolicVariableActivity, n2.get_variables()[0]).temporal_variable.est
         if time1 > time2:
@@ -32,4 +33,5 @@ class LatestStartTimeVarOH(VariableOrderingH):
         return 0
 
     def collect_data(self, all_meta_variables: Sequence[ConstraintNetwork]) -> None:
+        """No-op: this heuristic needs no data collected ahead of :meth:`compare`."""
         pass

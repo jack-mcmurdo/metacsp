@@ -34,6 +34,7 @@ class MetaVariable:
 
     @property
     def constraint_network(self) -> ConstraintNetwork | None:
+        """The ConstraintNetwork this MetaVariable wraps."""
         return self.mv
 
     def __str__(self) -> str:

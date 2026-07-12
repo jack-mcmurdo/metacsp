@@ -43,33 +43,41 @@ class PoseSteering:
 
     @property
     def x(self) -> float:
+        """This pose's x coordinate."""
         return self.pose.x
 
     @property
     def y(self) -> float:
+        """This pose's y coordinate."""
         return self.pose.y
 
     @property
     def z(self) -> float:
+        """This pose's z coordinate (NaN for a 2D pose)."""
         return self.pose.z
 
     @property
     def theta(self) -> float:
+        """Same as :attr:`yaw`."""
         return self.pose.theta
 
     @property
     def roll(self) -> float:
+        """This pose's roll angle (NaN for a 2D pose)."""
         return self.pose.roll
 
     @property
     def pitch(self) -> float:
+        """This pose's pitch angle (NaN for a 2D pose)."""
         return self.pose.pitch
 
     @property
     def yaw(self) -> float:
+        """This pose's yaw angle."""
         return self.pose.yaw
 
     def interpolate(self, p2: PoseSteering, ratio: float) -> PoseSteering:
+        """Linearly interpolate pose and steering angle between this and ``p2``."""
         interp = self.pose.interpolate(p2.pose, ratio)
         return PoseSteering(interp, Pose.lerp_degrees(self.steering, p2.steering, ratio))
 

@@ -13,6 +13,8 @@ __all__ = ["ConfigurationDomain"]
 
 
 class ConfigurationDomain(Domain):
+    """The domain of a ConfigurationVariable: a named configuration interval."""
+
     def __init__(self, cv: ConfigurationVariable) -> None:
         super().__init__(cv)
         self.configuration_name = f"Interval{cv.id}"

@@ -1,0 +1,3 @@
+# metacsp.exceptions
+
+::: metacsp.exceptions

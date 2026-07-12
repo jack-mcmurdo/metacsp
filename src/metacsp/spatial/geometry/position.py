@@ -6,6 +6,8 @@ __all__ = ["Position"]
 
 
 class Position:
+    """A 2D (x, y) position, used by the geometry package's physics types."""
+
     def __init__(self, x: float, y: float) -> None:
         self._x = x
         self._y = y

@@ -53,18 +53,22 @@ class MultiVariable(Variable):
 
     @property
     def internal_variables(self) -> list[Variable]:
+        """The lower-level Variables implementing this MultiVariable."""
         return self.variables
 
     @property
     def internal_constraints(self) -> list[Constraint] | None:
+        """The lower-level Constraints among this MultiVariable's internal variables."""
         return self.constraints
 
     @property
     def internal_constraint_solvers(self) -> list[ConstraintSolver]:
+        """The ConstraintSolvers owning this MultiVariable's internal variables."""
         return self.internal_solvers
 
     @property
     def domain(self) -> MultiDomain:
+        """A MultiDomain wrapping the domains of this MultiVariable's internal variables."""
         doms = [v.domain for v in self.variables]
         return MultiDomain(self, *doms)
 
@@ -101,6 +105,8 @@ class MultiVariable(Variable):
 
     @property
     def description(self) -> str:
+        """Human-readable description listing this MultiVariable's internal
+        variables and constraints."""
         ret = f"{type(self).__name__}: [vars: ["
         vars_: list[Variable] = []
         for v in self.internal_variables:
@@ -121,10 +127,12 @@ class MultiVariable(Variable):
 
     @property
     def component(self) -> str | None:
+        """Name of the component this MultiVariable belongs to, if any."""
         return Variable.component.fget(self)  # type: ignore[union-attr]
 
     @component.setter
     def component(self, component: str) -> None:
+        """Assign this MultiVariable, and all its immediate internal variables, to a component."""
         Variable.component.fset(self, component)  # type: ignore[union-attr]
         tree = self.variable_hierarchy
         for var in tree.children(tree.root):

@@ -15,6 +15,9 @@ __all__ = ["CollisionPolygonPolygon"]
 
 
 class CollisionPolygonPolygon:
+    """Separating-axis-theorem collision detection and manifold generation
+    between two convex Polygons."""
+
     def handle_collision(self, m: Manifold, a: Polygon, b: Polygon) -> bool:
         m.contact_count = 0
 

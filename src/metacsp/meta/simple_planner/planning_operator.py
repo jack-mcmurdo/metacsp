@@ -28,6 +28,7 @@ class PlanningOperator(SimpleOperator):
         self.effects = effects
 
     def is_effect(self, requirement: str) -> bool:
+        """True iff the named requirement activity is tagged as an achieved effect."""
         if self.requirement_activities is not None:
             for i in range(len(self.requirement_activities)):
                 if self.requirement_activities[i] == requirement:

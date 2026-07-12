@@ -18,6 +18,7 @@ class ActivityComparator:
         self.est = est
 
     def compare(self, o1: Activity, o2: Activity) -> int:
+        """Negative/zero/positive as ``o1`` starts (or ends) before/with/after ``o2``."""
         if self.est:
             return o1.temporal_variable.est - o2.temporal_variable.est
         return o1.temporal_variable.eet - o2.temporal_variable.eet

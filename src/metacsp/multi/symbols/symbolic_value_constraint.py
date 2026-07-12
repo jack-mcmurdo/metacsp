@@ -43,10 +43,12 @@ class SymbolicValueConstraint(MultiConstraint):
 
     @property
     def value(self) -> list[str] | None:
+        """The unary value (as symbol strings) for VALUE* constraint types."""
         return self._unary_value_strings
 
     @value.setter
     def value(self, v: list[bool] | list[str]) -> None:
+        """Set the unary value, either as a per-vocabulary-symbol bool list or symbol strings."""
         if v and isinstance(v[0], str):
             self._unary_value_strings = list(cast("list[str]", v))
         else:
@@ -208,6 +210,7 @@ class SymbolicValueConstraint(MultiConstraint):
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         Type = SymbolicValueConstraint.Type
         if self.type in (Type.VALUEDIFFERENT, Type.VALUEEQUALS, Type.VALUESUBSET):
             if self._unary_value_strings is None:
@@ -216,6 +219,7 @@ class SymbolicValueConstraint(MultiConstraint):
         return self.type.name
 
     def clone(self) -> SymbolicValueConstraint:
+        """Return an independent copy of this constraint."""
         res = SymbolicValueConstraint(self.type)
         if self._unary_value is not None:
             res.value = self._unary_value
@@ -224,9 +228,12 @@ class SymbolicValueConstraint(MultiConstraint):
         return res
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: symbolic value constraints have no notion of equivalence."""
         return False
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """Compile this constraint's type into internal BooleanConstraints over
+        the scoped SymbolicVariables' underlying BooleanVariables."""
         from metacsp.multi.symbols.symbolic_variable import SymbolicVariable
 
         if not variables:
@@ -255,11 +262,13 @@ class SymbolicValueConstraint(MultiConstraint):
         return f"{self.edge_label} ({self.scope})"
 
     def set_from(self, f: Variable) -> None:
+        """Set the source Variable of this constraint."""
         if not self.scope:
             self.scope = [None, None]  # type: ignore[list-item]
         self.scope[0] = f
 
     def set_to(self, t: Variable) -> None:
+        """Set the destination Variable of this constraint."""
         if not self.scope:
             self.scope = [None, None]  # type: ignore[list-item]
         self.scope[1] = t

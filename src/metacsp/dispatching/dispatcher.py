@@ -89,9 +89,11 @@ class Dispatcher:
         self._thread.start()
 
     def teardown(self) -> None:
+        """Stop this Dispatcher's background thread."""
         self._teardown = True
 
     def remove_finished_variable(self, to_remove: SymbolicVariableActivity) -> None:
+        """Forget the tracked dispatching state of a finished activity."""
         self.acts.pop(to_remove, None)
 
     def _equivalent_activities(
@@ -108,6 +110,7 @@ class Dispatcher:
         return True
 
     def manual_start(self, act: SymbolicVariableActivity, component: str) -> None:
+        """Mark an activity as manually started, bypassing the normal dispatch flow."""
         self.acts[act] = Dispatcher.ACTIVITY_STATE.MANUALLY_STARTED
 
     def _run(self) -> None:
@@ -197,28 +200,36 @@ class Dispatcher:
         self.logger.info("Shut down")
 
     def add_dispatching_function(self, component: str, df: DispatchingFunction) -> None:
+        """Register a DispatchingFunction for the given component name."""
         df.register_dispatcher(self)
         self.dfs[component] = df
 
     def get_dispatching_function(self, component: str) -> DispatchingFunction | None:
+        """The DispatchingFunction registered for the given component name, if any."""
         return self.dfs.get(component)
 
     def get_activities(self) -> list[SymbolicVariableActivity]:
+        """All activities this Dispatcher is currently tracking, regardless of state."""
         return list(self.acts.keys())
 
     def get_acts_in_state(self, st: Dispatcher.ACTIVITY_STATE) -> list[SymbolicVariableActivity]:
+        """Tracked activities currently in the given dispatching state."""
         return [act for act, state in self.acts.items() if state == st]
 
     def get_started_acts(self) -> list[SymbolicVariableActivity]:
+        """Tracked activities currently STARTED."""
         return self.get_acts_in_state(Dispatcher.ACTIVITY_STATE.STARTED)
 
     def get_finished_acts(self) -> list[SymbolicVariableActivity]:
+        """Tracked activities currently FINISHED."""
         return self.get_acts_in_state(Dispatcher.ACTIVITY_STATE.FINISHED)
 
     def finish(self, *acts_to_finish: SymbolicVariableActivity) -> None:
+        """Mark the given activities as finishing dispatch."""
         for act in acts_to_finish:
             self.acts[act] = Dispatcher.ACTIVITY_STATE.FINISHING
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The ConstraintNetwork of the ActivityNetworkSolver this Dispatcher drives."""
         return self.ans.constraint_network

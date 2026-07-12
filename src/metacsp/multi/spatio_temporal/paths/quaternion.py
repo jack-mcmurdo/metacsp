@@ -77,15 +77,19 @@ class Quaternion:
         return self.roll_pitch_yaw[2]
 
     def norm(self) -> float:
+        """The Euclidean norm of this Quaternion's four components."""
         return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)
 
     def conjugate(self) -> Quaternion:
+        """The conjugate of this Quaternion (x, -y, -z, -w)."""
         return Quaternion(self.x, -self.y, -self.z, -self.w)
 
     def plus(self, other: Quaternion) -> Quaternion:
+        """Component-wise sum of this Quaternion and ``other``."""
         return Quaternion(self.x + other.x, self.y + other.y, self.z + other.z, self.w + other.w)
 
     def times(self, other: Quaternion) -> Quaternion:
+        """Quaternion (Hamilton) product of this Quaternion and ``other``."""
         x = self.x * other.x - self.y * other.y - self.z * other.z - self.w * other.w
         y = self.x * other.y + self.y * other.x + self.z * other.w - self.w * other.z
         z = self.x * other.z - self.y * other.w + self.z * other.x + self.w * other.y
@@ -93,10 +97,12 @@ class Quaternion:
         return Quaternion(x, y, z, w)
 
     def inverse(self) -> Quaternion:
+        """The multiplicative inverse of this Quaternion."""
         d = self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w
         return Quaternion(self.x / d, -self.y / d, -self.z / d, -self.w / d)
 
     def divide(self, other: Quaternion) -> Quaternion:
+        """This Quaternion times the inverse of ``other``."""
         return self.times(other.inverse())
 
     def __str__(self) -> str:

@@ -31,17 +31,21 @@ class SymbolicVariableActivity(MultiVariable, Activity):
         super().__init__(cs, id, internal_solvers, internal_vars)
 
     def set_symbolic_domain(self, *symbols: str) -> None:
+        """Restrict this Activity's symbolic value to the given set of symbols."""
         self.symbolic_variable.set_symbolic_domain(*symbols)
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """No internal constraints: the temporal and symbolic parts are independent."""
         return None
 
     @property
     def domain(self) -> Any:
+        """This Activity's domain, as a MultiDomain over its temporal and symbolic parts."""
         return super().domain
 
     @domain.setter
     def domain(self, d: Any) -> None:
+        """No-op: a SymbolicVariableActivity's domain is derived from its internal variables."""
         pass
 
     def __str__(self) -> str:
@@ -57,16 +61,20 @@ class SymbolicVariableActivity(MultiVariable, Activity):
 
     @property
     def symbolic_variable(self) -> SymbolicVariable:
+        """This Activity's symbolic-value internal variable."""
         return cast(SymbolicVariable, self.internal_variables[1])
 
     @property
     def temporal_variable(self) -> AllenInterval:
+        """This Activity's temporal-placement internal variable."""
         return cast(AllenInterval, self.internal_variables[0])
 
     @property
     def variable(self) -> Variable:
+        """This Activity's own Variable identity (itself)."""
         return self
 
     @property
     def symbols(self) -> list[str]:
+        """This Activity's current symbolic value(s)."""
         return self.symbolic_variable.symbols

@@ -17,6 +17,8 @@ MAX_POLY_VERTEX_COUNT = 260
 
 
 class Vertex(Domain):
+    """The domain of a Polygon variable: its list of vertex coordinates."""
+
     def __init__(self, v: Variable) -> None:
         super().__init__(v)
         self.vertices: list[Vec2] = Vec2.array_of(MAX_POLY_VERTEX_COUNT)

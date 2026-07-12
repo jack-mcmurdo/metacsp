@@ -34,12 +34,15 @@ class Interval(Domain):
         return str(self.bounds)
 
     def compare_to(self, other: Interval) -> int:
+        """Ordering comparison, delegating to this Interval's Bounds."""
         return self.bounds.compare_to(other.bounds)
 
     @property
     def lower_bound(self) -> int:
+        """This Interval's start time."""
         return self.bounds.min
 
     @property
     def upper_bound(self) -> int:
+        """This Interval's end time."""
         return self.bounds.max

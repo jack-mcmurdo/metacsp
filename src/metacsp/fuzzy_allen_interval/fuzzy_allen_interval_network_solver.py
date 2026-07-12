@@ -33,6 +33,9 @@ class _IdentityValueChoiceFunction(ValueChoiceFunction):
 
 
 class FuzzyAllenIntervalNetworkSolver(ConstraintSolver):
+    """A path-consistency solver for fuzzy Allen interval constraints,
+    propagating possibility degrees over disjunctive qualitative relations."""
+
     def __init__(self) -> None:
         self.ids = 0
         self._global_possibility_degree = 0.0

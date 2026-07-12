@@ -15,6 +15,8 @@ __all__ = ["Region"]
 
 
 class Region(Variable):
+    """A variable for RCC-8/RCC2 reasoning, whose domain is a Rectangle."""
+
     def __init__(self, cs: ConstraintSolver, id: int) -> None:
         super().__init__(cs, id)
         self._dom: Domain = Rectangle(self)

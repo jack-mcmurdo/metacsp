@@ -120,14 +120,18 @@ class Sensor:
         return ret
 
     def post_sensor_value(self, sensor_value: str, time: int) -> int:
+        """Queue a reading for the animator to apply at the given time; returns a tracking id."""
         self.animator.post_sensor_value_to_dispatch(self, time, sensor_value)
         return self.get_hash_code(self.name, sensor_value, time)
 
     @staticmethod
     def get_hash_code(sensor_name: str, sensor_value: str, time: int) -> int:
+        """A stable id for a (sensor name, value, time) reading."""
         return _java_string_hash_code(sensor_name + sensor_value + str(time))
 
     def register_sensor_trace(self, sensor_trace_file: str, delta: int = 0) -> None:
+        """Load a ``.st`` sensor-trace file for this sensor and queue its readings,
+        shifting all times by ``delta``."""
         try:
             with open(sensor_trace_file) as f:
                 kept_lines = [line.rstrip("\n") for line in f if not line.startswith("#")]

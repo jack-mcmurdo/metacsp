@@ -96,6 +96,7 @@ class ActivityNetworkSolver(MultiConstraintSolver):
         return cast(AllenIntervalNetworkSolver, self.constraint_solvers[0]).rigidity_number
 
     def get_allen_interval_network_solver(self) -> AllenIntervalNetworkSolver:
+        """This solver's internal AllenIntervalNetworkSolver (temporal-placement layer)."""
         return cast(AllenIntervalNetworkSolver, self.constraint_solvers[0])
 
     def draw_as_gantt(self, selected_variable_names: list[str] | None = None) -> None:
@@ -107,24 +108,29 @@ class ActivityNetworkSolver(MultiConstraintSolver):
         raise NotImplementedError("the Swing Gantt chart viewer is not ported; see D10, M21")
 
     def propagate(self) -> bool:
+        """No-op: propagation is delegated entirely to the internal solvers."""
         # For now, does nothing. Propagation is taken care of by lower layers
         # (ultimately, the underlying temporal constraints are propagated by APSPSolver).
         return True
 
     def bookmark(self) -> int:
+        """Snapshot the underlying AllenIntervalNetworkSolver; return the bookmark's index."""
         a_solver = cast(AllenIntervalNetworkSolver, self.constraint_solvers[0])
         return a_solver.bookmark()
 
     def remove_bookmarks(self, i: int) -> None:
+        """Discard the bookmark at the given index without reverting to it."""
         a_solver = cast(AllenIntervalNetworkSolver, self.constraint_solvers[0])
         a_solver.remove_bookmark(i)
 
     def revert(self, i: int) -> None:
+        """Restore the state saved by :meth:`bookmark` at index ``i``, discarding later ones."""
         a_solver = cast(AllenIntervalNetworkSolver, self.constraint_solvers[0])
         a_solver.revert(i)
 
     @property
     def num_bookmarks(self) -> int:
+        """Number of bookmarks currently saved."""
         a_solver = cast(AllenIntervalNetworkSolver, self.constraint_solvers[0])
         return a_solver.num_bookmarks
 

@@ -32,6 +32,7 @@ class QualitativeAllenSolver(ConstraintSolver):
         self._successful_propagation = False
 
     def propagate(self) -> bool:
+        """Run path consistency over the completed constraint network; False if inconsistent."""
         if not self.get_constraints():
             return True
         self._create_complete_network()
@@ -40,6 +41,7 @@ class QualitativeAllenSolver(ConstraintSolver):
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The completed (all-pairs) network after a successful propagation, else the raw one."""
         if self._successful_propagation:
             assert self._complete_network is not None
             return self._complete_network
@@ -47,6 +49,7 @@ class QualitativeAllenSolver(ConstraintSolver):
 
     @constraint_network.setter
     def constraint_network(self, new_cn: ConstraintNetwork) -> None:
+        """Replace this solver's raw ConstraintNetwork."""
         self.the_network = new_cn
 
     def _create_complete_network(self) -> None:
@@ -139,12 +142,15 @@ class QualitativeAllenSolver(ConstraintSolver):
         return ret
 
     def add_constraints_sub(self, c: list[Constraint]) -> bool:
+        """No-op: constraints are only used when :meth:`propagate` next runs."""
         return True
 
     def remove_constraints_sub(self, c: list[Constraint]) -> None:
+        """No-op: constraints are only used when :meth:`propagate` next runs."""
         pass
 
     def create_variables_sub(self, num: int) -> list[Variable]:
+        """Create ``num`` SimpleAllenInterval variables."""
         ret = []
         for _ in range(num):
             ret.append(SimpleAllenInterval(self, self._ids))
@@ -152,7 +158,9 @@ class QualitativeAllenSolver(ConstraintSolver):
         return ret
 
     def remove_variables_sub(self, v: list[Variable]) -> None:
+        """No-op: nothing to release for a SimpleAllenInterval."""
         pass
 
     def register_value_choice_functions(self) -> None:
+        """No-op: this solver's Domain has no value choice functions."""
         pass

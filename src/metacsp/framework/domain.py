@@ -36,12 +36,14 @@ class Domain(ABC):
 
     @staticmethod
     def remove_value_choice_functions(specific_domain: type) -> None:
+        """Unregister all ValueChoiceFunctions for the given Domain subclass."""
         Domain.value_choice_functions[specific_domain] = None
 
     @staticmethod
     def register_value_choice_function(
         specific_domain: type, vcf: ValueChoiceFunction, name: str
     ) -> None:
+        """Register a named ValueChoiceFunction for the given Domain subclass."""
         one_class_vcfs = Domain.value_choice_functions.get(specific_domain)
         if one_class_vcfs is None:
             one_class_vcfs = {}
@@ -77,11 +79,13 @@ class Domain(ABC):
         return vcfunc.get_value(self)
 
     def set_default_value_choice_function(self, vcf: str) -> None:
+        """Set the name of the ValueChoiceFunction used by :meth:`choose_value` by default."""
         self.default_value_choice_function = vcf
 
     def get_value_choice_functions(
         self, specific_domain: type
     ) -> dict[str, ValueChoiceFunction] | None:
+        """The registered ValueChoiceFunctions for the given Domain subclass, if any."""
         return Domain.value_choice_functions.get(specific_domain)
 
     @abstractmethod

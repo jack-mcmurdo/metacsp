@@ -18,9 +18,11 @@ class MostConstrainedFirstVarOH(VariableOrderingH):
     DistanceConstraint (fewest disjuncts -- i.e. most constrained -- first)."""
 
     def compare(self, n1: ConstraintNetwork, n2: ConstraintNetwork) -> int:
+        """Negative/zero/positive as ``n1``'s DistanceConstraint has fewer/equal/more disjuncts."""
         dc0 = cast(DistanceConstraint, n1.get_constraints()[0])
         dc1 = cast(DistanceConstraint, n2.get_constraints()[0])
         return len(dc0.internal_constraints or []) - len(dc1.internal_constraints or [])
 
     def collect_data(self, all_meta_variables: Sequence[ConstraintNetwork]) -> None:
+        """No-op: this heuristic needs no data collected ahead of :meth:`compare`."""
         pass

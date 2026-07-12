@@ -6,6 +6,9 @@ __all__ = ["AssertionalRelation"]
 
 
 class AssertionalRelation:
+    """A named "from -> to" relation between two string-keyed entities, staged
+    before being bound to constraint-network variables."""
+
     def __init__(self, from_: str, to: str) -> None:
         self._from = from_
         self._to = to

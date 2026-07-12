@@ -64,14 +64,17 @@ class ConstraintNetwork:
 
     @property
     def graph(self) -> DirectedSparseMultigraph[Variable, Constraint]:
+        """The underlying directed multigraph backing this network."""
         return self._graph
 
     # --- change listeners (D2) ---
 
     def add_change_listener(self, listener: ChangeListener) -> None:
+        """Register a callable invoked on every added/removed Variable or Constraint."""
         self._listeners.append(listener)
 
     def remove_change_listener(self, listener: ChangeListener) -> None:
+        """Unregister a change listener previously added with :meth:`add_change_listener`."""
         self._listeners.remove(listener)
 
     def _dispatch(self, kind: Any, payload: Variable | Constraint) -> None:
@@ -92,26 +95,32 @@ class ConstraintNetwork:
         self.logger.debug("Added substitution %s <-- %s", vp, v)
 
     def add_substitutions(self, vp2v: dict[VariablePrototype, Variable]) -> None:
+        """Call :meth:`add_substitution` for each VariablePrototype/Variable pair."""
         for vp, v in vp2v.items():
             self.add_substitution(vp, v)
 
     def get_substitution(self, vp: VariablePrototype) -> Variable | None:
+        """The concrete Variable substituted for the given VariablePrototype, if any."""
         return self._substitutions.get(vp)
 
     def get_substituted(self, v: Variable) -> VariablePrototype | None:
+        """The VariablePrototype that the given Variable was substituted for, if any."""
         return self._substituted.get(v)
 
     def remove_substitution(self, vp: VariablePrototype) -> None:
+        """Remove the substitution recorded for the given VariablePrototype, if any."""
         v = self._substitutions.pop(vp, None)
         if v is not None:
             self._substituted.pop(v, None)
 
     @property
     def substitutions(self) -> dict[VariablePrototype, Variable]:
+        """Mapping from VariablePrototype to the concrete Variable substituted for it."""
         return self._substitutions
 
     @property
     def inverse_substitutions(self) -> dict[Variable, VariablePrototype]:
+        """Mapping from concrete Variable back to the VariablePrototype it was substituted for."""
         return self._substituted
 
     # --- constraint lookups ---
@@ -123,17 +132,20 @@ class ConstraintNetwork:
         return edges[0] if edges else None
 
     def get_constraints_between(self, from_: Variable, to: Variable) -> list[Constraint]:
+        """All Constraints directly connecting the two given Variables."""
         return self._graph.find_edge_set(from_, to)
 
     # --- variables ---
 
     def add_variable(self, v: Variable) -> None:
+        """Add a Variable to the network and notify change listeners."""
         self._graph.add_vertex(v)
         self._variables[v.id] = v
         self.logger.debug("Added variable %s", v)
         self._dispatch("variable_added", v)
 
     def remove_variable(self, v: Variable) -> None:
+        """Remove a Variable from the network and notify change listeners."""
         self._graph.remove_vertex(v)
         self._variables.pop(v.id, None)
         self.logger.debug("Removed variable %s", v)
@@ -142,6 +154,7 @@ class ConstraintNetwork:
     # --- constraints ---
 
     def add_constraints(self, *cons: Constraint) -> None:
+        """Call :meth:`add_constraint` for each given Constraint."""
         for c in cons:
             self.add_constraint(c)
 
@@ -167,6 +180,7 @@ class ConstraintNetwork:
         self._dispatch("constraint_added", c)
 
     def remove_constraint(self, c: Constraint) -> None:
+        """Remove a Constraint from the network and notify change listeners."""
         if isinstance(c, BinaryConstraint):
             self._graph.remove_edge(c)
             self.logger.debug("Removed binary constraint %s", c)
@@ -182,12 +196,15 @@ class ConstraintNetwork:
                 self._dispatch("constraint_removed", c)
 
     def get_variable_from(self, c: Constraint) -> Variable:
+        """The source Variable of a binary Constraint's graph edge."""
         return self._graph.source(c)
 
     def get_variable_to(self, c: Constraint) -> Variable:
+        """The destination Variable of a binary Constraint's graph edge."""
         return self._graph.dest(c)
 
     def get_variable(self, id: int) -> Variable | None:
+        """The Variable with the given id, if it is in this network."""
         return self._variables.get(id)
 
     def check_domains_instantiated(self) -> Variable | None:
@@ -199,6 +216,7 @@ class ConstraintNetwork:
         return None
 
     def get_incident_edges(self, v: Variable) -> list[Constraint]:
+        """All Constraints (incoming and outgoing) touching the given Variable."""
         result: dict[Constraint, None] = {}
         for e in self._graph.in_edges(v):
             result[e] = None
@@ -207,6 +225,7 @@ class ConstraintNetwork:
         return list(result)
 
     def get_incident_edges_including_dependent_variables(self, v: Variable) -> list[Constraint]:
+        """Like :meth:`get_incident_edges`, extended recursively over ``v``'s dependent variables."""
         result: dict[Constraint, None] = {}
         for con in self.get_incident_edges(v):
             result[con] = None
@@ -220,9 +239,11 @@ class ConstraintNetwork:
         return list(result)
 
     def get_ingoing_edges(self, v: Variable) -> list[Constraint]:
+        """Constraints for which the given Variable is the destination."""
         return list(dict.fromkeys(self._graph.in_edges(v)))
 
     def get_outgoing_edges(self, v: Variable) -> list[Constraint]:
+        """Constraints for which the given Variable is the source."""
         return list(dict.fromkeys(self._graph.out_edges(v)))
 
     def get_variables(
@@ -253,6 +274,7 @@ class ConstraintNetwork:
         return filtered
 
     def get_constraints(self) -> list[Constraint]:
+        """All Constraints in the network, binary and n-ary alike."""
         result: list[Constraint] = [
             c for c in self._graph.edges() if isinstance(c, BinaryConstraint)
         ]
@@ -260,15 +282,18 @@ class ConstraintNetwork:
         return result
 
     def contains_constraint(self, c: Constraint) -> bool:
+        """True iff the given Constraint is in this network."""
         return self._graph.contains_edge(c) or c in self._hyper_edges
 
     def contains_variable(self, v: Variable | int) -> bool:
+        """True iff the given Variable (or Variable id) is in this network."""
         if isinstance(v, int):
             return any(var.id == v for var in self._graph.vertices())
         return self._graph.contains_vertex(v)
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods (one line per constraint)."""
         return "".join(str(con) + "\n" for con in self.get_constraints())
 
     def __str__(self) -> str:
@@ -304,13 +329,16 @@ class ConstraintNetwork:
 
     @property
     def weight(self) -> float:
+        """Arbitrary weight attached to this network (e.g. by search heuristics)."""
         return self._weight
 
     @weight.setter
     def weight(self, value: float) -> None:
+        """Set this network's weight."""
         self._weight = value
 
     def clone(self) -> ConstraintNetwork:
+        """Return a new network of the same type containing the same Variables and Constraints."""
         ret = type(self)(self.solver)
         for v in self.get_variables():
             ret.add_variable(v)
@@ -352,19 +380,23 @@ class ConstraintNetwork:
         return list(result)
 
     def mask_constraints(self) -> None:
+        """Mask every Constraint in this network."""
         for con in self.get_constraints():
             con.mask()
 
     def unmask_constraints(self) -> None:
+        """Unmask every Constraint in this network."""
         for con in self.get_constraints():
             con.unmask()
 
     @property
     def unmasked_constraints(self) -> list[Constraint]:
+        """All Constraints in this network that are not masked."""
         return [con for con in self.get_constraints() if not con.is_masked]
 
     @property
     def masked_constraints(self) -> list[Constraint]:
+        """All Constraints in this network that are masked."""
         return [con for con in self.get_constraints() if con.is_masked]
 
     def save(self, path: str | Path) -> None:
@@ -375,15 +407,18 @@ class ConstraintNetwork:
 
     @classmethod
     def load(cls, path: str | Path) -> ConstraintNetwork:
+        """Deserialize a ConstraintNetwork previously written by :meth:`save`."""
         with open(path, "rb") as f:
             return pickle.load(f)
 
 
 def mask_constraints(cons: list[Constraint]) -> None:
+    """Mask every Constraint in the given list."""
     for con in cons:
         con.mask()
 
 
 def unmask_constraints(cons: list[Constraint]) -> None:
+    """Unmask every Constraint in the given list."""
     for con in cons:
         con.unmask()

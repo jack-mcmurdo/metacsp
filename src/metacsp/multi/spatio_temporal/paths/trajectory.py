@@ -78,10 +78,12 @@ class Trajectory:
 
     @property
     def sequence_number_start(self) -> int:
+        """Index of this Trajectory's first path point within its parent (if any)."""
         return self._sequence_number_start
 
     @property
     def sequence_number_end(self) -> int:
+        """Index of this Trajectory's last path point within its parent (if any)."""
         return self._sequence_number_end
 
     @property
@@ -96,6 +98,7 @@ class Trajectory:
 
     @property
     def dts(self) -> list[float]:
+        """The minimum transition times (seconds) between successive path poses."""
         return self._dts
 
     @dts.setter

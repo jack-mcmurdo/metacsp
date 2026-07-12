@@ -41,6 +41,7 @@ class ProactivePlanningDomain(SimpleDomain):
         self.time_now = -1
 
     def set_old_inference(self, component: str, old_inf: SymbolicVariableActivity) -> None:
+        """Record the last inferred activity for a context-variable component."""
         self.old_inferences[component] = old_inf
 
     def _generate_goals(self) -> list[VariablePrototype]:
@@ -59,9 +60,11 @@ class ProactivePlanningDomain(SimpleDomain):
         return list(vars_)
 
     def reset_context_inference(self) -> None:
+        """Allow one more context-inference MetaVariable to be produced this cycle."""
         self.triggered = False
 
     def get_meta_variables(self) -> list[ConstraintNetwork]:
+        """The usual planning flaws, plus (at most once per cycle) a context-inference flaw."""
         # Add the normal metavariables for planning (UNJUSTIFIED activities).
         ret = super().get_meta_variables()
         new_ret: list[ConstraintNetwork] = list(ret)
@@ -73,6 +76,8 @@ class ProactivePlanningDomain(SimpleDomain):
         return new_ret
 
     def get_meta_values(self, meta_variable: MetaVariable) -> list[ConstraintNetwork]:
+        """Resolvers for a planning flaw as usual, or hypothesized context states
+        for a context-inference flaw."""
         mv = meta_variable.constraint_network
         assert mv is not None
 
@@ -119,4 +124,5 @@ class ProactivePlanningDomain(SimpleDomain):
         return ret_list
 
     def update_time_now(self, time_now: int) -> None:
+        """Set the current time, used to release actuator activities no earlier than now."""
         self.time_now = time_now

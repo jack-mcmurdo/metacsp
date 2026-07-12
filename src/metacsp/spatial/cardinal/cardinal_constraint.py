@@ -20,6 +20,9 @@ __all__ = ["CardinalConstraint"]
 
 
 class CardinalConstraint(BinaryConstraint):
+    """A binary constraint stating the cardinal direction (North, East, ...)
+    of one region relative to another."""
+
     class Type(Enum):
         North = 0
         West = 1

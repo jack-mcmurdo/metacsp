@@ -62,14 +62,18 @@ class Timeline(ABC):
 
     @property
     @abstractmethod
-    def values(self) -> list[Any]: ...
+    def values(self) -> list[Any]:
+        """The value(s) holding in each interval between consecutive pulses."""
+        ...
 
     @property
     def pulses(self) -> list[int]:
+        """The sorted times at which some Activity on this component starts or ends."""
         return self._pulses
 
     @property
     def durations(self) -> list[int]:
+        """The duration of each interval between consecutive pulses."""
         return self._durations
 
     def draw(self) -> None:
@@ -82,16 +86,23 @@ class Timeline(ABC):
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The ConstraintNetwork this Timeline was built from."""
         return self._an
 
     @abstractmethod
-    def is_undetermined(self, o: Any) -> bool: ...
+    def is_undetermined(self, o: Any) -> bool:
+        """True iff no Activity holds a value in the given pulse interval."""
+        ...
 
     @abstractmethod
-    def is_critical(self, o: Any) -> bool: ...
+    def is_critical(self, o: Any) -> bool:
+        """True iff the given pulse interval's value is at risk of change."""
+        ...
 
     @abstractmethod
-    def is_inconsistent(self, o: Any) -> bool: ...
+    def is_inconsistent(self, o: Any) -> bool:
+        """True iff the given pulse interval's Activity domain was restricted to zero symbols."""
+        ...
 
     def __str__(self) -> str:
         return (

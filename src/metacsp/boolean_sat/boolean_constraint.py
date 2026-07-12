@@ -168,14 +168,17 @@ class BooleanConstraint(Constraint):
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         return str(self)
 
     def clone(self) -> BooleanConstraint:
+        """Return an independent copy of this constraint."""
         ret = BooleanConstraint(list(self.scope), list(self.positive))
         ret.auto_removable = self.auto_removable
         return ret
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """True iff ``c`` is a BooleanConstraint over the same scope with the same signs."""
         if not isinstance(c, BooleanConstraint):
             return False
         if len(self.scope) != len(c.scope):

@@ -65,6 +65,7 @@ class MultiConstraintSolver(ConstraintSolver):
     def get_constraint_solver(
         cs: ConstraintSolver, constraint_solver_class: type
     ) -> ConstraintSolver | None:
+        """Find the first solver of the given type in ``cs``'s internal solver hierarchy."""
         if type(cs) is constraint_solver_class:
             return cs
         if isinstance(cs, MultiConstraintSolver):
@@ -75,6 +76,7 @@ class MultiConstraintSolver(ConstraintSolver):
         return None
 
     def set_options(self, *ops: MultiConstraintSolver.Options) -> None:
+        """Enable the given MultiConstraintSolver Options."""
         for op in ops:
             if op is MultiConstraintSolver.Options.ALLOW_INCONSISTENCIES:
                 self._allow_inconsistencies = True
@@ -82,6 +84,7 @@ class MultiConstraintSolver(ConstraintSolver):
                 self._allow_inconsistencies = False
 
     def get_option(self, op: MultiConstraintSolver.Options) -> bool:
+        """True iff the given Option is currently in effect for this solver."""
         if op is MultiConstraintSolver.Options.ALLOW_INCONSISTENCIES:
             return self._allow_inconsistencies
         if op is MultiConstraintSolver.Options.FORCE_CONSISTENCY:
@@ -96,6 +99,8 @@ class MultiConstraintSolver(ConstraintSolver):
     # --- constraints ---
 
     def add_constraints_sub(self, c: list[Constraint]) -> bool:
+        """Add MultiConstraints by propagating their internal constraints to the
+        relevant internal solvers, and instantiating any lifted constraints."""
         sorted_cons: dict[ConstraintSolver, list[Constraint]] = {}
         for con in c:
             if isinstance(con, MultiConstraint):
@@ -174,6 +179,7 @@ class MultiConstraintSolver(ConstraintSolver):
         return True
 
     def remove_constraints_sub(self, c: list[Constraint]) -> None:
+        """Remove MultiConstraints' internal constraints from the relevant internal solvers."""
         internal_cons: dict[ConstraintSolver, list[Constraint]] = {}
         for con in c:
             if isinstance(con, MultiConstraint):
@@ -206,6 +212,7 @@ class MultiConstraintSolver(ConstraintSolver):
     # --- variables ---
 
     def remove_variables_sub(self, v: list[Variable]) -> None:
+        """Remove each MultiVariable's internal variables from their respective solvers."""
         solvers: dict[ConstraintSolver, list[Variable]] = {}
         for one_var in v:
             if isinstance(one_var, MultiVariable):
@@ -275,11 +282,14 @@ class MultiConstraintSolver(ConstraintSolver):
         return ret
 
     def create_variables_sub(self, num: int) -> list[Variable] | None:
+        """Create ``num`` MultiVariables using this solver's configured ``ingredients``."""
         return self.create_variables_sub_ingredients(self.ingredients, num, None)
 
     def create_variables_sub_component(
         self, num: int, component: str | None
     ) -> list[Variable] | None:
+        """Create ``num`` MultiVariables tagged with a component, using this solver's
+        configured ``ingredients``."""
         return self.create_variables_sub_ingredients(self.ingredients, num, component)
 
     @abstractmethod
@@ -288,10 +298,12 @@ class MultiConstraintSolver(ConstraintSolver):
     # --- solver/network hierarchy ---
 
     def set_constraint_solver(self, i: int, c_solver: ConstraintSolver) -> None:
+        """Replace the internal solver at index ``i``."""
         self.constraint_solvers[i] = c_solver
 
     @property
     def description(self) -> str:
+        """Human-readable description of this solver and its internal solver hierarchy."""
         spacer = ConstraintSolver.spacing * ConstraintSolver.nesting
         ret = f"{spacer}[{type(self).__name__} vars: [{self.variable_type.__name__}"
         ret += "] constraints: ["
@@ -305,6 +317,7 @@ class MultiConstraintSolver(ConstraintSolver):
 
     @property
     def constraint_solver_hierarchy(self) -> DelegateTree[ConstraintSolver, str]:
+        """The tree of internal ConstraintSolvers rooted at this solver."""
         ret: DelegateTree[ConstraintSolver, str] = DelegateTree()
         ret.set_root(self)
         for i, cs in enumerate(self.constraint_solvers):
@@ -318,9 +331,11 @@ class MultiConstraintSolver(ConstraintSolver):
     def get_constraint_solvers_from_constraint_solver_hierarchy(
         self, cl: type
     ) -> list[ConstraintSolver]:
+        """All solvers of the given type in this solver's internal hierarchy."""
         return [cs for cs in self.constraint_solver_hierarchy.vertices() if type(cs) is cl]
 
     def get_constraint_networks_from_solver_hierarchy(self, cl: type) -> list[ConstraintNetwork]:
+        """The ConstraintNetworks of all solvers of the given type in this solver's hierarchy."""
         ret = [
             cs.constraint_network
             for cs in self.constraint_solver_hierarchy.vertices()
@@ -334,6 +349,7 @@ class MultiConstraintSolver(ConstraintSolver):
 
     @property
     def constraint_network_hierarchy(self) -> DelegateTree[ConstraintNetwork, str]:
+        """The tree of internal ConstraintNetworks rooted at this solver's own network."""
         ret: DelegateTree[ConstraintNetwork, str] = DelegateTree()
         my_cn = self.constraint_network
         ret.set_root(my_cn)
@@ -346,10 +362,13 @@ class MultiConstraintSolver(ConstraintSolver):
         return ret
 
     def failure_pruning(self, failure_time: int) -> None:
+        """Remove all constraints, variables, and component tags from this solver's network."""
         self.remove_constraints(self.get_constraints())
         self.remove_variables(self.get_variables())
         for vars_ in self.components.values():
             vars_.clear()
 
     def register_value_choice_functions(self) -> None:
+        """No-op: MultiConstraintSolvers register value choice functions on their internal
+        solvers' Domains instead."""
         pass

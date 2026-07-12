@@ -38,35 +38,45 @@ class Scheduler(MetaConstraintSolver):
         )
 
     def pre_backtrack(self) -> None:
+        """No-op: Scheduler needs no extra bookkeeping before branching."""
         pass
 
     def retract_resolver_sub(
         self, meta_variable: ConstraintNetwork, meta_value: ConstraintNetwork
     ) -> None:
+        """No-op: Scheduler needs no extra bookkeeping when retracting a resolver."""
         pass
 
     def add_resolver_sub(
         self, meta_variable: ConstraintNetwork, meta_value: ConstraintNetwork
     ) -> bool:
+        """Always True: resolvers are always accepted before ground-CSP propagation."""
         return True
 
     def post_backtrack(self, mv: MetaVariable) -> None:
+        """No-op: Scheduler needs no extra bookkeeping after branching."""
         pass
 
     def get_upper_bound(self) -> float:
+        """Always 0.0: Scheduler does not support branch-and-bound optimization."""
         return 0.0
 
     def set_upper_bound(self) -> None:
+        """No-op: Scheduler does not support branch-and-bound optimization."""
         pass
 
     def get_lower_bound(self) -> float:
+        """Always 0.0: Scheduler does not support branch-and-bound optimization."""
         return 0.0
 
     def set_lower_bound(self) -> None:
+        """No-op: Scheduler does not support branch-and-bound optimization."""
         pass
 
     def has_conflict_clause(self, meta_value: ConstraintNetwork) -> bool:
+        """Always False: Scheduler does not support branch-and-bound optimization."""
         return False
 
     def reset_false_clause(self) -> None:
+        """No-op: Scheduler does not support branch-and-bound optimization."""
         pass

@@ -21,14 +21,17 @@ class FocusConstraint(Constraint):
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         return str(self.scope)
 
     def clone(self) -> FocusConstraint:
+        """Return an independent copy of this FocusConstraint."""
         ret = FocusConstraint()
         ret.scope = self.scope
         return ret
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """True iff ``c`` is a FocusConstraint over the same set of Variables."""
         if not isinstance(c, FocusConstraint):
             return False
         for var in self.scope:

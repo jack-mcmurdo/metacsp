@@ -29,6 +29,7 @@ class MultiConstraint(Constraint):
 
     @property
     def internal_constraints(self) -> list[Constraint] | None:
+        """The lower-level constraints implementing this MultiConstraint (created lazily)."""
         if self._internal_constraints is None:
             self._internal_constraints = self.create_internal_constraints(self.scope)
         return self._internal_constraints
@@ -48,6 +49,7 @@ class MultiConstraint(Constraint):
 
     @property
     def description(self) -> str:
+        """Human-readable description listing this constraint's internal constraint types."""
         ret = f"{type(self).__name__}: ["
         if self.internal_constraints is not None:
             ret += ",".join(type(con).__name__ for con in self.internal_constraints)

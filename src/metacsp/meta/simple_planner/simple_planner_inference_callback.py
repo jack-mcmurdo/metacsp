@@ -38,6 +38,7 @@ class SimplePlannerInferenceCallback:
                 break
 
     def do_inference(self, time_now: int) -> None:
+        """Re-run planning at the given time and record any newly inferred activities."""
         if self.planner is not None:
             assert self.domain is not None
             self.domain.reset_context_inference()
@@ -56,4 +57,5 @@ class SimplePlannerInferenceCallback:
                     self.domain.set_old_inference(cast(str, act.component), act)
 
     def __call__(self, time_now: int) -> None:
+        """Alias for :meth:`do_inference`, so instances satisfy the InferenceCallback protocol."""
         self.do_inference(time_now)

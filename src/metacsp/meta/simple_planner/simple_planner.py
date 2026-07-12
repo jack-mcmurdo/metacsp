@@ -35,11 +35,13 @@ class SimplePlanner(MetaConstraintSolver):
         )
 
     def pre_backtrack(self) -> None:
+        """No-op: SimplePlanner needs no extra bookkeeping before branching."""
         pass
 
     def retract_resolver_sub(
         self, meta_variable: ConstraintNetwork, meta_value: ConstraintNetwork
     ) -> None:
+        """Remove the Activities instantiated for a retracted resolver, freeing their resource usage."""
         ground_solver = cast(ActivityNetworkSolver, self.constraint_solvers[0])
         activity_to_remove: list[Variable] = []
 
@@ -69,6 +71,8 @@ class SimplePlanner(MetaConstraintSolver):
         current_problematic_constraint_network: ConstraintNetwork,
         possible_operator_constraint_network: ConstraintNetwork,
     ) -> bool:
+        """Instantiate real Activities for a resolver's VariablePrototypes and register
+        their resource usage. Always returns True."""
         ground_solver = cast(ActivityNetworkSolver, self.constraint_solvers[0])
 
         # Make real variables from variable prototypes.
@@ -116,25 +120,32 @@ class SimplePlanner(MetaConstraintSolver):
         return True
 
     def post_backtrack(self, mv: MetaVariable) -> None:
+        """Reset a SimpleDomain flaw's Activities to UNJUSTIFIED after backtracking over it."""
         if isinstance(mv.meta_constraint, SimpleDomain):
             assert mv.constraint_network is not None
             for v in mv.constraint_network.get_variables():
                 v.marking = SimpleDomain.markings.UNJUSTIFIED
 
     def get_upper_bound(self) -> float:
+        """Always 0.0: SimplePlanner does not support branch-and-bound optimization."""
         return 0.0
 
     def set_upper_bound(self) -> None:
+        """No-op: SimplePlanner does not support branch-and-bound optimization."""
         pass
 
     def get_lower_bound(self) -> float:
+        """Always 0.0: SimplePlanner does not support branch-and-bound optimization."""
         return 0.0
 
     def set_lower_bound(self) -> None:
+        """No-op: SimplePlanner does not support branch-and-bound optimization."""
         pass
 
     def has_conflict_clause(self, meta_value: ConstraintNetwork) -> bool:
+        """Always False: SimplePlanner does not support branch-and-bound optimization."""
         return False
 
     def reset_false_clause(self) -> None:
+        """No-op: SimplePlanner does not support branch-and-bound optimization."""
         pass

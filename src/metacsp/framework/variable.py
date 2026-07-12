@@ -51,9 +51,11 @@ class Variable(ABC):
         self._dependent_variables = list(dep_vars)
 
     def add_dependent_variables(self, *dep_vars: Variable) -> None:
+        """Append variables to this Variable's dependent-variable list."""
         self._dependent_variables = self._dependent_variables + list(dep_vars)
 
     def remove_dependent_variables(self, *dep_vars: Variable) -> None:
+        """Remove variables from this Variable's dependent-variable list."""
         self._dependent_variables = [v for v in self._dependent_variables if v not in dep_vars]
 
     def depends_on(self, var: Variable) -> bool:
@@ -82,6 +84,7 @@ class Variable(ABC):
 
     @property
     def parent_variable(self) -> Variable | None:
+        """The MultiVariable this Variable is nested under, if any."""
         return self._parent_variable
 
     @parent_variable.setter
@@ -109,6 +112,7 @@ class Variable(ABC):
 
     @property
     def marking(self) -> Any:
+        """Arbitrary solver-assigned marking, used to record search decisions."""
         return self._marking
 
     @marking.setter
@@ -120,14 +124,19 @@ class Variable(ABC):
 
     @property
     @abstractmethod
-    def domain(self) -> Domain | None: ...
+    def domain(self) -> Domain | None:
+        """This Variable's Domain."""
+        ...
 
     @domain.setter
     @abstractmethod
-    def domain(self, d: Domain) -> None: ...
+    def domain(self, d: Domain) -> None:
+        """Set this Variable's Domain."""
+        ...
 
     @property
     def constraint_solver(self) -> ConstraintSolver:
+        """The ConstraintSolver that created this Variable."""
         return self._solver
 
     @abstractmethod
@@ -135,10 +144,12 @@ class Variable(ABC):
 
     @property
     def component(self) -> str | None:
+        """Name of the component this Variable belongs to, if any."""
         return self._solver.get_component(self)
 
     @component.setter
     def component(self, component: str) -> None:
+        """Assign this Variable to a named component."""
         self._solver.set_component(component, self)
 
     def __eq__(self, other: object) -> bool:
@@ -172,14 +183,17 @@ class Variable(ABC):
 
     @property
     def description(self) -> str:
+        """Short human-readable description of this Variable (defaults to the class name)."""
         return type(self).__name__
 
     @property
     def color(self) -> Any:
+        """Color used when rendering this Variable."""
         return self._color
 
     @color.setter
     def color(self, c: Any) -> None:
+        """Set the color used when rendering this Variable."""
         self._color = c
 
 

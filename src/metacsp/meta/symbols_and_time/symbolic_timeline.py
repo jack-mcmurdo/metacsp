@@ -30,6 +30,7 @@ class SymbolicTimeline(Timeline):
             return str(self.strings)
 
         def union(self, other: list[str]) -> None:
+            """Extend this bag with the given strings."""
             self.strings = self.strings + list(other)
 
     def __init__(
@@ -67,17 +68,21 @@ class SymbolicTimeline(Timeline):
 
     @property
     def values(self) -> list[SymbolicTimeline.ArrayOfStrings | None]:
+        """The symbol(s) held in each interval between consecutive pulses (see class docstring)."""
         return self._values
 
     def is_undetermined(self, o: Any) -> bool:
+        """True iff no Activity holds a value in the given pulse interval."""
         return o is None
 
     def is_critical(self, o: Any) -> bool:
+        """True iff exactly one symbol holds in the given pulse interval."""
         if isinstance(o, SymbolicTimeline.ArrayOfStrings):
             return len(o.strings) == 1
         return False
 
     def is_inconsistent(self, o: Any) -> bool:
+        """True iff no symbol holds in the given pulse interval (a domain wipeout)."""
         if isinstance(o, SymbolicTimeline.ArrayOfStrings):
             return len(o.strings) == 0
         return False

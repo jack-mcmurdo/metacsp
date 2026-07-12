@@ -20,6 +20,8 @@ __all__ = ["ReachabilityConstraintSolver"]
 
 
 class ReachabilityConstraintSolver(ConstraintSolver):
+    """A ConstraintSolver over ConfigurationVariables and ReachabilityConstraints."""
+
     def __init__(self) -> None:
         super().__init__([ReachabilityConstraint], ConfigurationVariable)
         # Java leaves AUTO_PROPAGATE commented out -- solver stays MANUAL_PROPAGATE.

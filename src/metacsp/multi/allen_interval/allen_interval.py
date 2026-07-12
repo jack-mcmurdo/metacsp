@@ -40,6 +40,7 @@ class AllenInterval(MultiVariable):
         return this_bounds.is_intersecting(that_bounds)
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """Post the default Duration constraint between this interval's own start and end."""
         from metacsp.multi.allen_interval.allen_interval_constraint import (
             AllenIntervalConstraint,
         )
@@ -57,46 +58,57 @@ class AllenInterval(MultiVariable):
 
     @property
     def domain(self) -> Domain:
+        """This interval's domain, as a MultiDomain over its start/end TimePoints."""
         return super().domain
 
     @domain.setter
     def domain(self, d: Any) -> None:
+        """No-op: an AllenInterval's domain is derived from its start/end TimePoints."""
         pass
 
     @property
     def start(self) -> TimePoint:
+        """This interval's start TimePoint."""
         return cast(TimePoint, self.variables[0])
 
     @start.setter
     def start(self, s: TimePoint) -> None:
+        """Set this interval's start TimePoint."""
         self.variables[0] = s
 
     @property
     def end(self) -> TimePoint:
+        """This interval's end TimePoint."""
         return cast(TimePoint, self.variables[1])
 
     @end.setter
     def end(self, e: TimePoint) -> None:
+        """Set this interval's end TimePoint."""
         self.variables[1] = e
 
     @property
     def est(self) -> int:
+        """Earliest start time."""
         return self.start.domain.choose_value("ET")
 
     @property
     def lst(self) -> int:
+        """Latest start time."""
         return self.start.domain.choose_value("LT")
 
     @property
     def eet(self) -> int:
+        """Earliest end time."""
         return self.end.domain.choose_value("ET")
 
     @property
     def let(self) -> int:
+        """Latest end time."""
         return self.end.domain.choose_value("LT")
 
     @property
     def duration(self) -> Bounds:
+        """The [min, max] duration bounds implied by this interval's start/end bounds."""
         min_dur = self.end.domain.choose_value("ET") - self.start.domain.choose_value("LT")
         max_dur = self.end.domain.choose_value("LT") - self.start.domain.choose_value("ET")
         return Bounds(min_dur, max_dur)

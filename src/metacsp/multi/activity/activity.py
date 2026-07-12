@@ -28,4 +28,6 @@ class Activity(ABC):
 
     @property
     @abstractmethod
-    def variable(self) -> Variable: ...
+    def variable(self) -> Variable:
+        """This Activity's own Variable identity."""
+        ...

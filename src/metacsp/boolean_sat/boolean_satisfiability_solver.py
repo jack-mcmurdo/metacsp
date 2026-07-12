@@ -78,9 +78,11 @@ class BooleanSatisfiabilitySolver(ConstraintSolver):
             self.set_options(ConstraintSolver.Options.NO_PROP_ON_VAR_CREATION)
 
     def set_enumerate_models(self, enumerate_models: bool) -> None:
+        """Set whether :meth:`propagate` enumerates all satisfying models or stops at one."""
         self._enumerate_models = enumerate_models
 
     def enumerates_models(self) -> bool:
+        """True iff this solver enumerates all satisfying models."""
         return self._enumerate_models
 
     def _reset_current_models(self) -> None:
@@ -115,6 +117,7 @@ class BooleanSatisfiabilitySolver(ConstraintSolver):
             bv.allow_true()
 
     def propagate(self) -> bool:
+        """Solve the CNF formed by unmasked constraints; False iff unsatisfiable."""
         start = time.time()
 
         sat4j_solver = Minisat22()
@@ -158,12 +161,15 @@ class BooleanSatisfiabilitySolver(ConstraintSolver):
         return True
 
     def add_constraints_sub(self, c: list[Constraint]) -> bool:
+        """No-op: constraints are only used when :meth:`propagate` next runs."""
         return True
 
     def remove_constraints_sub(self, c: list[Constraint]) -> None:
+        """No-op: constraints are only used when :meth:`propagate` next runs."""
         pass
 
     def create_variables_sub(self, num: int) -> list[Variable]:
+        """Create ``num`` BooleanVariables."""
         ret = []
         for _ in range(num):
             ret.append(BooleanVariable(self, self.bv_ids))
@@ -171,9 +177,11 @@ class BooleanSatisfiabilitySolver(ConstraintSolver):
         return ret
 
     def remove_variables_sub(self, v: list[Variable]) -> None:
+        """No-op: nothing to release for a BooleanVariable."""
         pass
 
     def register_value_choice_functions(self) -> None:
+        """Register a "modelX" ValueChoiceFunction for BooleanDomain per current SAT model."""
         Domain.remove_value_choice_functions(BooleanDomain)
         if self._current_models:
             for i in range(len(self._current_models)):

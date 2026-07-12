@@ -11,6 +11,8 @@ __all__ = ["ImpulseMath"]
 
 
 class ImpulseMath:
+    """Physics constants and float-comparison helpers shared by the collision/impulse solver."""
+
     PI = math.pi
     EPSILON = 0.0001
     EPSILON_SQ = EPSILON * EPSILON

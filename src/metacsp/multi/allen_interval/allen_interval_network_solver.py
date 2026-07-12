@@ -36,6 +36,7 @@ class AllenIntervalNetworkSolver(MultiConstraintSolver):
     def _create_constraint_solvers(
         origin: int, horizon: int, max_activities: int | None
     ) -> list[ConstraintSolver]:
+        """Build the single internal APSPSolver, sized for ``max_activities`` if given."""
         if max_activities is not None and max_activities >= 1:
             stp_solver = APSPSolver(origin, horizon, 2 * max_activities)
         else:
@@ -44,10 +45,12 @@ class AllenIntervalNetworkSolver(MultiConstraintSolver):
 
     @property
     def origin(self) -> int:
+        """The origin of the underlying STP."""
         return cast(APSPSolver, self.constraint_solvers[0]).o
 
     @property
     def horizon(self) -> int:
+        """The horizon of the underlying STP."""
         return cast(APSPSolver, self.constraint_solvers[0]).h
 
     def get_admissible_distance_bounds(
@@ -62,24 +65,29 @@ class AllenIntervalNetworkSolver(MultiConstraintSolver):
 
     @property
     def rigidity_number(self) -> float:
+        """Root mean square rigidity of the underlying STP (see :meth:`APSPSolver.get_rms_rigidity`)."""
         return cast(APSPSolver, self.constraint_solvers[0]).get_rms_rigidity()
 
     def propagate(self) -> bool:
+        """No-op: propagation is delegated entirely to the internal APSPSolver."""
         # Do nothing, APSPSolver takes care of propagation.
         return True
 
     def bookmark(self) -> int:
+        """Snapshot the activity network and the underlying STP; return the bookmark's index."""
         a_net = self.constraint_network.clone()
         self._activity_network_rollback.append(a_net)
         stp_solver = cast(APSPSolver, self.constraint_solvers[0])
         return stp_solver.bookmark()
 
     def remove_bookmark(self, i: int) -> None:
+        """Discard the bookmark at the given index without reverting to it."""
         del self._activity_network_rollback[i]
         stp_solver = cast(APSPSolver, self.constraint_solvers[0])
         stp_solver.remove_bookmark(i)
 
     def revert(self, i: int) -> None:
+        """Restore the state saved by :meth:`bookmark` at index ``i``, discarding later ones."""
         self.the_network = self._activity_network_rollback[i]
         del self._activity_network_rollback[i:]
 
@@ -94,4 +102,5 @@ class AllenIntervalNetworkSolver(MultiConstraintSolver):
 
     @property
     def num_bookmarks(self) -> int:
+        """Number of bookmarks currently saved."""
         return cast(APSPSolver, self.constraint_solvers[0]).num_bookmarks

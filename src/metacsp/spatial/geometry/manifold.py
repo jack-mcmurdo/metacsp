@@ -14,6 +14,9 @@ __all__ = ["Manifold"]
 
 
 class Manifold:
+    """The contact information (normal, penetration, contact points) resulting
+    from a collision test between two Polygons."""
+
     def __init__(self, a: Polygon, b: Polygon) -> None:
         self.a = a
         self.b = b

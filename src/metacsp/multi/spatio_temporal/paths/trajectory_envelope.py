@@ -164,10 +164,12 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def footprint(self) -> Polygon | None:
+        """This envelope's robot footprint polygon (local frame)."""
         return self._footprint
 
     @property
     def inner_footprint(self) -> Polygon | None:
+        """This envelope's inner (conservative) robot footprint polygon (local frame), if set."""
         return self._inner_footprint
 
     def set_footprint(self, *args: Union[Coordinate, float, BaseGeometry]) -> None:
@@ -189,6 +191,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
         self._footprint = TrajectoryEnvelope.create_footprint_polygon(*_flatten_coord_args(args))
 
     def set_inner_footprint(self, *coords: Coordinate) -> None:
+        """Set this envelope's inner (conservative) footprint from vertex coordinates."""
         self._inner_footprint = TrajectoryEnvelope.create_footprint_polygon(
             *_flatten_coord_args(coords)
         )
@@ -203,6 +206,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @staticmethod
     def create_footprint_polygon(*coords: Coordinate) -> Polygon:
+        """Build a closed Polygon from the given vertex coordinates."""
         ring = list(coords) + [coords[0]]
         return Polygon(ring)
 
@@ -239,6 +243,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def envelope_hierarchy(self) -> DelegateTree[TrajectoryEnvelope, str]:
+        """The tree of sub-envelopes rooted at this TrajectoryEnvelope."""
         ret: DelegateTree[TrajectoryEnvelope, str] = DelegateTree()
         ret.set_root(self)
         if self._sub_envelopes is not None:
@@ -248,6 +253,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def info(self) -> str:
+        """Human-readable summary of this envelope's ground envelopes and their temporal profile."""
         assert self._trajectory is not None
         te_dts = self._trajectory.dts
         te_cts = self.cts
@@ -262,30 +268,36 @@ class TrajectoryEnvelope(MultiVariable, Activity):
         return ret
 
     def add_sub_envelope(self, se: TrajectoryEnvelope) -> None:
+        """Register a sub-TrajectoryEnvelope under this one."""
         if self._sub_envelopes is None:
             self._sub_envelopes = []
         self._sub_envelopes.append(se)
 
     @property
     def has_sub_envelopes(self) -> bool:
+        """True iff this TrajectoryEnvelope has been split into sub-envelopes."""
         return bool(self._sub_envelopes)
 
     @property
     def sub_envelopes(self) -> list[TrajectoryEnvelope] | None:
+        """This TrajectoryEnvelope's direct sub-envelopes, if any."""
         return self._sub_envelopes
 
     def _create_ct_vector(self) -> list[float]:
         return [-1.0] * self.path_length
 
     def get_time_to_estimate(self, seq_num_now: int, seq_num_to: int) -> float:
+        """An estimate of the time to move between two path indices (see :meth:`Trajectory.get_time_to_estimate`)."""
         assert self._trajectory is not None
         return self._trajectory.get_time_to_estimate(seq_num_now, seq_num_to)
 
     def get_time_left_estimate(self, seq_num: int) -> float:
+        """An estimate of the time left to move given the current path index."""
         assert self._trajectory is not None
         return self._trajectory.get_time_left_estimate(seq_num)
 
     def get_partial_time_left_estimate(self, seq_num: int) -> float:
+        """Like :meth:`get_time_left_estimate`, restricted to the ground envelope at ``seq_num``."""
         return self.get_ground_envelope(seq_num).get_time_left_estimate(seq_num)
 
     @property
@@ -320,6 +332,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
         return ret
 
     def get_ground_envelope(self, seq_num: int) -> TrajectoryEnvelope:
+        """The ground envelope containing the given path-sequence index."""
         if seq_num >= self.path_length:
             raise RuntimeError(
                 f"Path length of {self} less than requested sequence number ({seq_num})"
@@ -348,6 +361,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
         return None
 
     def get_closest_ground_envelope(self, time: int) -> TrajectoryEnvelope | None:
+        """The ground envelope active at (or nearest before) the given time, if any."""
         if self.temporal_variable.est > time or self.temporal_variable.eet < time:
             return None
         if not self.has_sub_envelopes:
@@ -363,14 +377,17 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def super_envelope(self) -> TrajectoryEnvelope | None:
+        """The TrajectoryEnvelope this one is a sub-envelope of, if any."""
         return self._super_envelope
 
     @super_envelope.setter
     def super_envelope(self, super_envelope: TrajectoryEnvelope | None) -> None:
+        """Set this envelope's super-envelope and recompute its sequence numbers."""
         self._super_envelope = super_envelope
         self._update_sequence_numbers()
 
     def get_pose_steering(self, time: int) -> PoseSteering:
+        """The interpolated PoseSteering on this envelope's path at the given time."""
         assert self._trajectory is not None
         ps_list = self._trajectory.pose_steering
         start_time = self.temporal_variable.est
@@ -409,6 +426,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def cts(self) -> list[float]:
+        """Per-path-point completion times: start/end time of each ground envelope, else -1."""
         ret = self._create_ct_vector()
         counter = 0
         for te in self.ground_envelopes:
@@ -421,10 +439,12 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def robot_id(self) -> int:
+        """The id of the robot this envelope belongs to (-1 if unset)."""
         return self._robot_id
 
     @robot_id.setter
     def robot_id(self, robot_id: int) -> None:
+        """Set the id of the robot this envelope belongs to."""
         self._robot_id = robot_id
 
     def _update_sequence_numbers(self) -> None:
@@ -452,14 +472,17 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def has_super_envelope(self) -> bool:
+        """True iff this TrajectoryEnvelope is a sub-envelope of another."""
         return self._super_envelope is not None
 
     @property
     def refinable(self) -> bool:
+        """True iff this envelope may still be split into sub-envelopes."""
         return self._refinable
 
     @refinable.setter
     def refinable(self, refinable: bool) -> None:
+        """Set whether this envelope may still be split into sub-envelopes."""
         self._refinable = refinable
 
     def __lt__(self, other: Variable) -> bool:
@@ -467,14 +490,18 @@ class TrajectoryEnvelope(MultiVariable, Activity):
         return False
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """No internal constraints: the Activity, path, envelope, and inner-envelope parts
+        are independent."""
         return None
 
     @property
     def domain(self) -> Any:
+        """This envelope's domain, as a MultiDomain over its internal variables."""
         return super().domain
 
     @domain.setter
     def domain(self, d: Any) -> None:
+        """Route a LineString/Point/Polygonal domain to the matching internal variable."""
         if isinstance(d, (LineStringDomain, PointDomain)):
             self.internal_variables[1].domain = d
         elif isinstance(d, PolygonalDomain):
@@ -493,39 +520,48 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def temporal_variable(self) -> AllenInterval:
+        """This envelope's temporal-placement internal variable."""
         return cast(SymbolicVariableActivity, self.internal_variables[0]).temporal_variable
 
     @property
     def reference_path_variable(self) -> GeometricShapeVariable:
+        """This envelope's reference-path internal variable."""
         return cast(GeometricShapeVariable, self.internal_variables[1])
 
     @property
     def envelope_variable(self) -> GeometricShapeVariable:
+        """This envelope's spatial-envelope internal variable."""
         return cast(GeometricShapeVariable, self.internal_variables[2])
 
     @property
     def internal_envelope_variable(self) -> GeometricShapeVariable:
+        """This envelope's inner-envelope internal variable."""
         return cast(GeometricShapeVariable, self.internal_variables[3])
 
     @property
     def symbolic_variable_activity(self) -> SymbolicVariableActivity:
+        """This envelope's temporal+symbolic Activity internal variable."""
         return cast(SymbolicVariableActivity, self.internal_variables[0])
 
     @property
     def symbols(self) -> list[str]:
+        """This envelope's current symbolic value(s)."""
         return self.symbolic_variable_activity.symbols
 
     @property
     def variable(self) -> Variable:
+        """This envelope's own Variable identity (itself)."""
         return self
 
     def get_sequence_number(self, coord: Coordinate) -> int:
+        """The sequence number of the path point closest to a given coordinate."""
         assert self._trajectory is not None
         return self._trajectory.get_sequence_number(coord)
 
     # --- envelope geometry ---
 
     def get_partial_envelope_geometry(self, index_from: int, index_to: int) -> BaseGeometry:
+        """The union of footprints swept between two path indices (inclusive)."""
         assert self._trajectory is not None
         ps_list = self._trajectory.pose_steering
         if (
@@ -559,6 +595,8 @@ class TrajectoryEnvelope(MultiVariable, Activity):
     def create_spatial_envelope(
         path: Sequence[PoseSteering], *footprint: Coordinate
     ) -> SpatialEnvelope:
+        """Build a standalone SpatialEnvelope (path, swept geometry, footprint) for a path
+        and footprint, without a backing TrajectoryEnvelope variable."""
         fp = TrajectoryEnvelope.create_footprint_polygon(*footprint)
         footprints = [TrajectoryEnvelope.make_footprint_for(ps, fp) for ps in path]
         one_poly = _union_footprints(footprints)
@@ -567,6 +605,7 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def spatial_envelope(self) -> SpatialEnvelope:
+        """This envelope's path, swept geometry, and footprint as a SpatialEnvelope."""
         geom = cast(PolygonalDomain, self.envelope_variable.domain).geometry
         assert self._trajectory is not None and self._footprint is not None
         return SpatialEnvelope(self._trajectory.pose_steering, geom, self._footprint)
@@ -583,10 +622,12 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def trajectory(self) -> Trajectory | None:
+        """This envelope's Trajectory, if set."""
         return self._trajectory
 
     @trajectory.setter
     def trajectory(self, traj: Trajectory) -> None:
+        """Set this envelope's Trajectory, building its swept geometry and duration constraint."""
         if self._footprint is None:
             raise NoFootprintException(
                 f"No footprint set for {self}, please specify one before setting the trajectory."
@@ -635,14 +676,17 @@ class TrajectoryEnvelope(MultiVariable, Activity):
 
     @property
     def sequence_number_start(self) -> int:
+        """Index of this envelope's first path point within its super-envelope, if any."""
         return self._sequence_number_start
 
     @property
     def sequence_number_end(self) -> int:
+        """Index of this envelope's last path point within its super-envelope, if any."""
         return self._sequence_number_end
 
     @property
     def path_length(self) -> int:
+        """Number of path points in this envelope's Trajectory."""
         assert self._trajectory is not None
         return len(self._trajectory.pose_steering)
 

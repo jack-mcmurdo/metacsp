@@ -32,9 +32,11 @@ class MultiMetaConstraint(MetaConstraint):
         self.my_constraint_ordering_h = cons_oh
 
     def get_con_ordering_h(self) -> ConstraintOrderingH:
+        """The heuristic used to pick amongst this MultiMetaConstraint's sub-MetaConstraints."""
         return self.my_constraint_ordering_h
 
     def get_meta_variable(self) -> ConstraintNetwork | None:
+        """The highest-priority meta-variable across all sub-MetaConstraints."""
         sub_meta_cons: dict[MetaConstraint, ConstraintNetwork] = {}
         for mc in self.my_meta_cons:
             new_mv = mc.get_meta_variable()

@@ -39,6 +39,8 @@ class SymbolicVariable(MultiVariable):
         return False
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """Post the internal BooleanConstraints encoding "at least one symbol set"
+        (and, if the solver requires single-valued variables, "at most one symbol")."""
         solver = cast("SymbolicVariableConstraintSolver", self.constraint_solver)
         if not variables:
             return None
@@ -75,13 +77,16 @@ class SymbolicVariable(MultiVariable):
 
     @property
     def domain(self) -> Any:
+        """This variable's domain, as a MultiDomain over its internal BooleanVariables."""
         return super().domain
 
     @domain.setter
     def domain(self, d: Any) -> None:
+        """No-op: a SymbolicVariable's domain is derived from its internal variables."""
         pass
 
     def set_symbolic_domain(self, *symbols: str) -> None:
+        """Restrict this variable's value to the given set of symbols."""
         solver = cast("SymbolicVariableConstraintSolver", self.constraint_solver)
         solver_symbols = solver.symbols
 
@@ -117,6 +122,8 @@ class SymbolicVariable(MultiVariable):
 
     @property
     def symbols(self) -> list[str]:
+        """The symbols this variable currently holds true (from the solver's vocabulary
+        plus any values set outside it)."""
         ret: list[str] = []
         solver = cast("SymbolicVariableConstraintSolver", self.constraint_solver)
         for i, iv in enumerate(self.internal_variables):

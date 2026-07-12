@@ -142,30 +142,38 @@ class SimpleDomain(MetaConstraint):
             self.current_resource_utilizers[rr] = {}
 
     def get_scheduling_meta_constraints(self) -> list[Schedulable]:
+        """The SimpleReusableResources of this domain, as Schedulable MetaConstraints."""
         return list(self.current_resource_utilizers.keys())
 
     def set_filtering_time(self, filtering_time: int) -> None:
+        """Set the earliest latest-end-time a candidate unification must have to be considered."""
         self.filtering_time = filtering_time
 
     def add_resource_utilizers(self, rr: SimpleReusableResource, hm: dict[Variable, int]) -> None:
+        """Replace the usage map (Variable -> amount) for a given resource."""
         self.current_resource_utilizers[rr] = hm
 
     def add_resource_utilizer(self, rr: SimpleReusableResource, var: Variable, amount: int) -> None:
+        """Register a Variable's usage amount for a given resource."""
         self.current_resource_utilizers[rr][var] = amount
 
     def add_resource_map(
         self, resourcename: str, simple_reusable_resource: SimpleReusableResource
     ) -> None:
+        """Register a named SimpleReusableResource with this domain."""
         self.resources_map[resourcename] = simple_reusable_resource
 
     def add_operator(self, r: SimpleOperator) -> None:
+        """Register a SimpleOperator (or PlanningOperator) with this domain."""
         self.operators.append(r)
 
     def get_ground_solver(self) -> ConstraintSolver:
+        """The domain's single ground solver (the meta-solver's ActivityNetworkSolver)."""
         assert self.meta_cs is not None
         return self.meta_cs.constraint_solvers[0]
 
     def get_meta_variables(self) -> list[ConstraintNetwork]:
+        """One MetaVariable per UNJUSTIFIED Activity in the ground network."""
         ground_solver = cast(ActivityNetworkSolver, self.get_ground_solver())
         ret: list[ConstraintNetwork] = []
         # For every variable marked UNJUSTIFIED a ConstraintNetwork is built.
@@ -179,6 +187,8 @@ class SimpleDomain(MetaConstraint):
     def expand_operator(
         self, possible_operator: SimpleOperator, problematic_activity: SymbolicVariableActivity
     ) -> ConstraintNetwork:
+        """Instantiate a SimpleOperator against a problematic Activity: build the
+        VariablePrototypes for its other requirements/head and the constraints among them."""
         activity_network_to_return = ConstraintNetwork(None)
         ground_solver = cast(ActivityNetworkSolver, self.get_ground_solver())
 
@@ -299,21 +309,27 @@ class SimpleDomain(MetaConstraint):
         return activity_network_to_return
 
     def add_sensor(self, sensor: str) -> None:
+        """Register a component name as a sensor (unified against, never expanded)."""
         self.sensors.append(sensor)
 
     def add_actuator(self, actuator: str) -> None:
+        """Register a component name as an actuator (planned via operator expansion)."""
         self.actuators.append(actuator)
 
     def add_context_var(self, cv: str) -> None:
+        """Register a component name as a context variable."""
         self.context_vars.append(cv)
 
     def is_sensor(self, component: str | None) -> bool:
+        """True iff the given component name was registered as a sensor."""
         return component in self.sensors
 
     def is_actuator(self, component: str | None) -> bool:
+        """True iff the given component name was registered as an actuator."""
         return component in self.actuators
 
     def is_context_var(self, component: str | None) -> bool:
+        """True iff the given component name was registered as a context variable."""
         return component in self.context_vars
 
     def _filter_unifications(
@@ -326,6 +342,8 @@ class SimpleDomain(MetaConstraint):
     def get_unifications(
         self, activity: SymbolicVariableActivity
     ) -> list[ConstraintNetwork] | None:
+        """Resolvers unifying the given Activity with an existing JUSTIFIED Activity
+        of the same component and a compatible symbol, or None if none exist."""
         ground_solver = cast(ActivityNetworkSolver, self.get_ground_solver())
         acts = ground_solver.get_variables()
 
@@ -365,6 +383,8 @@ class SimpleDomain(MetaConstraint):
         return unifications
 
     def get_meta_values(self, meta_variable: MetaVariable) -> list[ConstraintNetwork]:
+        """Resolvers for an UNJUSTIFIED Activity: unifications for sensors/context vars/
+        actuators, plus operator expansions, ordered by priority annotation."""
         ret_possible_constraint_networks: list[ConstraintNetwork] = []
         problematic_network = meta_variable.constraint_network
         assert problematic_network is not None
@@ -491,20 +511,24 @@ class SimpleDomain(MetaConstraint):
         return []
 
     def mark_resolved_sub(self, meta_variable: MetaVariable, meta_value: ConstraintNetwork) -> None:
+        """Mark the resolved flaw's Activity as JUSTIFIED."""
         cn = meta_variable.constraint_network
         assert cn is not None
         if cn.get_variables():
             cn.get_variables()[0].marking = SimpleDomain.markings.JUSTIFIED
 
     def draw(self, network: ConstraintNetwork) -> None:
+        """No-op: SimpleDomain has no dedicated visualization."""
         pass
 
     def get_resources(self) -> dict[str, SimpleReusableResource]:
+        """This domain's resources, keyed by name."""
         return self.resources_map
 
     def get_current_reusable_resources_used_by_activity(
         self, act: Variable
     ) -> list[SimpleReusableResource]:
+        """The resources for which the given Variable currently has a registered usage."""
         return [
             rr
             for rr in self.current_resource_utilizers
@@ -512,12 +536,15 @@ class SimpleDomain(MetaConstraint):
         ]
 
     def get_resource_usage_level(self, rr: SimpleReusableResource, act: Variable) -> int:
+        """The registered usage amount of a Variable on a given resource."""
         return self.current_resource_utilizers[rr][act]
 
     def get_all_resource_usage_level(self) -> dict[SimpleReusableResource, dict[Variable, int]]:
+        """The full usage map: resource -> {Variable -> amount}."""
         return self.current_resource_utilizers
 
     def reset_all_resource_allocation(self) -> None:
+        """Clear all registered resource usages."""
         self.current_resource_utilizers = {}
         for rr in self.resources_map.values():
             self.current_resource_utilizers[rr] = {}
@@ -527,16 +554,20 @@ class SimpleDomain(MetaConstraint):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: SimpleDomain is not drawn as a graph edge."""
         return None
 
     def clone(self) -> SimpleDomain | None:
+        """Always None: SimpleDomain does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: SimpleDomain has no notion of equivalence."""
         return False
 
     @staticmethod
     def instantiate_variable(var: str) -> str:
+        """Strip a ``.ddl`` bound placeholder down to its ``?name`` suffix."""
         return var[var.index("?") :]
 
     @staticmethod
@@ -688,6 +719,7 @@ class SimpleDomain(MetaConstraint):
 
     @staticmethod
     def parse_keyword(keyword: str, everything: str) -> list[str]:
+        """All ``(<keyword> ...)`` element bodies found in a ``.ddl`` domain-description string."""
         elements: list[str] = []
         last_element = everything.rfind(keyword)
         while last_element != -1:
@@ -724,6 +756,7 @@ class SimpleDomain(MetaConstraint):
 
     @staticmethod
     def process_resources(resources: list[str]) -> dict[str, int]:
+        """Parse ``"name capacity"`` resource element strings into a name -> capacity mapping."""
         ret: dict[str, int] = {}
         for resource_element in resources:
             resource_name = resource_element[: resource_element.index(" ")].strip()
@@ -821,4 +854,5 @@ class SimpleDomain(MetaConstraint):
         return dom
 
     def _add_timeline(self, timeline: str) -> None:
+        """Register a component name to be shown as a timeline (e.g. by a future viewer)."""
         self.timelines.append(timeline)

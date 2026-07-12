@@ -16,6 +16,8 @@ __all__ = ["RCC2ConstraintSolver"]
 
 
 class RCC2ConstraintSolver(ConstraintSolver):
+    """A ConstraintSolver over Polygon variables and GeometricConstraints (DC/INSIDE)."""
+
     def __init__(self) -> None:
         super().__init__([GeometricConstraint], Polygon)
         self.set_options(ConstraintSolver.Options.AUTO_PROPAGATE)

@@ -33,12 +33,19 @@ class SimpleDistanceConstraint(BinaryConstraint):
         return len(self._bs)
 
     def add_interval(self, i: Bounds) -> bool:
+        """Record an additional [lb,ub] interval posted between the two TimePoints.
+
+        Returns False (without recording) if ``i`` falls outside the constraint's
+        current [minimum, maximum].
+        """
         if i.max < self.minimum or i.min > self.maximum:
             return False
         self._bs.append(i)
         return True
 
     def remove_interval(self, i: Bounds) -> bool:
+        """Remove a previously added interval and recompute [minimum, maximum]
+        as the intersection of those remaining; False if ``i`` was not present."""
         try:
             self._bs.remove(i)
         except ValueError:
@@ -52,9 +59,11 @@ class SimpleDistanceConstraint(BinaryConstraint):
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         return f"[{print_long(self.minimum)},{print_long(self.maximum)}]"
 
     def clone(self) -> SimpleDistanceConstraint:
+        """Return an independent copy of this constraint."""
         sdc = SimpleDistanceConstraint()
         sdc.from_ = self.from_
         sdc.to = self.to
@@ -70,6 +79,7 @@ class SimpleDistanceConstraint(BinaryConstraint):
         return self.clone()
 
     def invert(self) -> SimpleDistanceConstraint:
+        """Return the equivalent constraint with ``from_``/``to`` swapped and bounds negated."""
         new_constraint = SimpleDistanceConstraint()
         new_constraint.minimum = -self.maximum
         new_constraint.maximum = -self.minimum
@@ -78,4 +88,5 @@ class SimpleDistanceConstraint(BinaryConstraint):
         return new_constraint
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """True iff ``c`` is this same constraint object."""
         return c == self

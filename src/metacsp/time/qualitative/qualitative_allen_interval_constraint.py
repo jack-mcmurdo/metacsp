@@ -39,15 +39,18 @@ class QualitativeAllenIntervalConstraint(BinaryConstraint):
         self.types: list[QualitativeAllenIntervalConstraint.Type] = list(types)
 
     def contains_type(self, type_: Type) -> bool:
+        """True iff the given basic relation is one of this constraint's disjuncts."""
         return type_ in self.types
 
     def clone(self) -> QualitativeAllenIntervalConstraint:
+        """Return an independent copy of this constraint."""
         ret = QualitativeAllenIntervalConstraint()
         ret.types = self.types
         return ret
 
     @property
     def edge_label(self) -> str:
+        """Value drawn by ConstraintNetwork rendering methods."""
         if not self.types:
             return ""
         if len(self.types) == 1:
@@ -55,18 +58,21 @@ class QualitativeAllenIntervalConstraint(BinaryConstraint):
         return "{" + " v ".join(t.name for t in self.types) + "}"
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: qualitative Allen constraints have no notion of equivalence."""
         return False
 
     # --- Type ordinal / relation utilities ---
 
     @staticmethod
     def get_inverse_relation(t: Type | Sequence[Type]):
+        """The inverse of one basic relation, or of each in a sequence (e.g. Before -> After)."""
         if isinstance(t, QualitativeAllenIntervalConstraint.Type):
             return _INVERSE[t]
         return [_INVERSE[one] for one in t]
 
     @staticmethod
     def lookup_type_by_int(i: int) -> Type:
+        """The basic relation Type with the given ordinal value."""
         return QualitativeAllenIntervalConstraint.Type(i)
 
     @staticmethod
@@ -88,6 +94,8 @@ class QualitativeAllenIntervalConstraint(BinaryConstraint):
 
     @staticmethod
     def get_dimension(*types: Type) -> int:
+        """The topological dimension of a disjunction of basic relations
+        (the max dimension of any disjunct)."""
         if not types:
             return -1
         return max(QualitativeAllenIntervalConstraint._dimension_of_basic_rel(t) for t in types)

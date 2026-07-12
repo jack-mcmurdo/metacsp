@@ -36,6 +36,7 @@ class MetaConstraint(Constraint):
         self.independent_mc = False
 
     def set_meta_solver(self, meta_cs: MetaConstraintSolver) -> None:
+        """Attach this MetaConstraint to the MetaConstraintSolver driving its search."""
         self.meta_cs = meta_cs
         self.logger.debug("Set MetaConstraintSolver to %s", meta_cs.description)
 

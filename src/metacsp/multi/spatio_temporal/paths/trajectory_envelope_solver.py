@@ -74,16 +74,19 @@ class TrajectoryEnvelopeSolver(MultiConstraintSolver):
 
     @property
     def origin(self) -> int:
+        """The origin of the underlying STP."""
         return self.get_temporal_solver().origin
 
     @property
     def horizon(self) -> int:
+        """The horizon of the underlying STP."""
         return self.get_temporal_solver().horizon
 
     @staticmethod
     def _create_internal_constraint_solvers(
         origin: int, horizon: int, max_trajectories: int
     ) -> list[ConstraintSolver]:
+        """Build the internal ActivityNetworkSolver and DE9IMRelationSolver."""
         if max_trajectories >= 1:
             activity_solver: ActivityNetworkSolver = ActivityNetworkSolver(
                 origin, horizon, max_trajectories
@@ -93,14 +96,17 @@ class TrajectoryEnvelopeSolver(MultiConstraintSolver):
         return [activity_solver, DE9IMRelationSolver()]
 
     def propagate(self) -> bool:
+        """No-op: propagation is delegated entirely to the internal solvers."""
         return True
 
     def get_temporal_solver(self) -> AllenIntervalNetworkSolver:
+        """This solver's internal AllenIntervalNetworkSolver (temporal-placement layer)."""
         return cast(
             ActivityNetworkSolver, self.constraint_solvers[0]
         ).get_allen_interval_network_solver()
 
     def get_spatial_solver(self) -> DE9IMRelationSolver:
+        """This solver's internal DE9IMRelationSolver (spatial layer)."""
         return cast(DE9IMRelationSolver, self.constraint_solvers[1])
 
     def get_trajectory_envelopes(self, robot_id: int) -> list[TrajectoryEnvelope]:
@@ -134,6 +140,8 @@ class TrajectoryEnvelopeSolver(MultiConstraintSolver):
         traj_robot: Trajectory,
         *footprint_coords: Coordinate,
     ) -> list[TrajectoryEnvelope]:
+        """Build a driving envelope for ``traj_robot`` plus start/end parking envelopes
+        joined by Meets constraints and minimum-duration constraints."""
         ret: list[TrajectoryEnvelope] = []
 
         te = cast(TrajectoryEnvelope, self.create_variable())
@@ -236,6 +244,7 @@ class TrajectoryEnvelopeSolver(MultiConstraintSolver):
         location_name: str,
         *footprint_coords: Coordinate,
     ) -> TrajectoryEnvelope:
+        """Create a standalone parking TrajectoryEnvelope with a minimum-duration constraint."""
         parking = cast(TrajectoryEnvelope, self.create_variable())
         parking.component = f"Robot{robot_id}"
         parking.symbolic_variable_activity.set_symbolic_domain(f"Parking ({location_name})")

@@ -81,6 +81,8 @@ def _convex_hull_order(verts: list[Vec2]) -> tuple[list[Vec2], int]:
 
 
 class Polygon(Variable):
+    """A convex polygon Variable used by the physics-based geometric constraint solvers."""
+
     MAX_POLY_VERTEX_COUNT = MAX_POLY_VERTEX_COUNT
 
     def __init__(self, cs: ConstraintSolver, id: int) -> None:

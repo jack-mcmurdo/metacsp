@@ -24,6 +24,7 @@ class Axiom:
         ]
 
     def add_constraint(self, c: AllenIntervalConstraint, from_: int, to: int) -> None:
+        """Set the extra AllenIntervalConstraint between two requirement activities by index."""
         self.extra_constraints[from_][to] = c
 
     def __str__(self) -> str:

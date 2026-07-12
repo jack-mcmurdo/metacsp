@@ -58,6 +58,7 @@ class SimpleOperator:
             self.extra_constraints = [[None]]
 
     def add_constraint(self, c: AllenIntervalConstraint, from_: int, to: int) -> None:
+        """Set the extra AllenIntervalConstraint between the head/requirement activities by index."""
         self.extra_constraints[from_][to] = c
 
     def __str__(self) -> str:

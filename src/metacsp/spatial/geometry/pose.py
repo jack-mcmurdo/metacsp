@@ -12,6 +12,8 @@ __all__ = ["Pose"]
 
 
 class Pose:
+    """A 2D position plus orientation, used by the geometry package's physics types."""
+
     def __init__(self) -> None:
         self.position: Position | None = None
         self.orientation: Quaternion | None = None

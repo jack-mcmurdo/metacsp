@@ -22,6 +22,7 @@ class MultiBinaryConstraint(MultiConstraint):
         self.scope = [None, None]  # type: ignore[list-item]
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
+        """Delegate to :meth:`create_internal_constraints_from_to` on the two-Variable scope."""
         return self.create_internal_constraints_from_to(variables[0], variables[1])
 
     @abstractmethod
@@ -33,18 +34,22 @@ class MultiBinaryConstraint(MultiConstraint):
 
     @property
     def from_(self) -> Variable:
+        """The source Variable of this constraint."""
         return self.scope[0]
 
     @from_.setter
     def from_(self, f: Variable) -> None:
+        """Set the source Variable of this constraint."""
         self.scope[0] = f
 
     @property
     def to(self) -> Variable:
+        """The destination Variable of this constraint."""
         return self.scope[1]
 
     @to.setter
     def to(self, t: Variable) -> None:
+        """Set the destination Variable of this constraint."""
         self.scope[1] = t
 
     def __str__(self) -> str:

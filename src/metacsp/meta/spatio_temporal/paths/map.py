@@ -28,6 +28,7 @@ class Map(Schedulable):
         self.peak_collection_strategy = Schedulable.PEAKCOLLECTION.BINARY
 
     def is_conflicting(self, peak: list[Activity]) -> bool:
+        """True iff the peak's two envelopes belong to different robots and overlap in space."""
         if len(peak) < 2:
             return False
         te1 = cast("TrajectoryEnvelope", peak[0])
@@ -45,6 +46,7 @@ class Map(Schedulable):
         return True
 
     def draw(self, network: ConstraintNetwork) -> None:
+        """No-op: Map has no dedicated visualization."""
         pass
 
     def __str__(self) -> str:
@@ -52,13 +54,17 @@ class Map(Schedulable):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: Map is not drawn as a graph edge."""
         return None
 
     def clone(self) -> Map | None:
+        """Always None: Map does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: Map has no notion of equivalence."""
         return False
 
     def get_ground_solver(self) -> ConstraintSolver | None:
+        """Always None: Map has no single ground solver of its own."""
         return None

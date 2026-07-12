@@ -82,6 +82,7 @@ class SymbolicVariableConstraintSolver(MultiConstraintSolver):
 
     @staticmethod
     def union(*variables: Variable) -> Variable:
+        """Create a new SymbolicVariable holding the union of the given variables' symbols."""
         solver = SymbolicVariableConstraintSolver._this_solver
         assert solver is not None
         ret = cast(SymbolicVariable, solver.create_variable(variables[0].component))
@@ -102,6 +103,8 @@ class SymbolicVariableConstraintSolver(MultiConstraintSolver):
 
     @staticmethod
     def intersection(*variables: Variable) -> Variable | None:
+        """Create a new SymbolicVariable holding the intersection of the given variables'
+        symbols, or None if the intersection is empty."""
         solver = SymbolicVariableConstraintSolver._this_solver
         assert solver is not None
         unary_equals = SymbolicValueConstraint(SymbolicValueConstraint.Type.VALUEEQUALS)
@@ -135,15 +138,18 @@ class SymbolicVariableConstraintSolver(MultiConstraintSolver):
         return ret
 
     def set_enumerate_sets(self, enumerate_sets: bool) -> None:
+        """Set whether the underlying SAT solver should enumerate all satisfying models."""
         self.enumerate_sets = enumerate_sets
         cast(BooleanSatisfiabilitySolver, self.constraint_solvers[0]).set_enumerate_models(
             enumerate_sets
         )
 
     def get_symbol(self, i: int) -> str:
+        """The vocabulary symbol at index ``i``."""
         return self.symbols[i]
 
     def get_boolean_for_symbol(self, symbol: str) -> BooleanVariable | None:
+        """The BooleanVariable representing the given vocabulary symbol, if any."""
         for i, s in enumerate(self.symbols):
             if s == symbol:
                 return cast(
@@ -152,10 +158,12 @@ class SymbolicVariableConstraintSolver(MultiConstraintSolver):
         return None
 
     def propagate(self) -> bool:
+        """No-op: propagation is delegated entirely to the internal BooleanSatisfiabilitySolver."""
         # Propagation is taken care of by the underlying BooleanSatisfiabilitySolver.
         return True
 
     def mask_constraints(self, constraints: list[Constraint]) -> None:
+        """Mask internal constraints of variables with no neighbors, for SAT solver efficiency."""
         # Mask the internal constraints (BooleanConstraints) that model unary values for
         # variables that have no neighbors -- makes the SAT solver much more efficient.
         unconstrained_variables = self._get_unconstrained_variables(constraints)
@@ -167,5 +175,6 @@ class SymbolicVariableConstraintSolver(MultiConstraintSolver):
         self.logger.debug("Masked internal constraints")
 
     def unmask_constraints(self, constraints: list[Constraint]) -> None:
+        """Unmask all internal constraints previously masked by :meth:`mask_constraints`."""
         self.constraint_solvers[0].constraint_network.unmask_constraints()
         self.logger.debug("Unmasked internal constraints")

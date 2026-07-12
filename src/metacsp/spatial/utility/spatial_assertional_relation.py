@@ -19,6 +19,9 @@ __all__ = ["SpatialAssertionalRelation"]
 
 
 class SpatialAssertionalRelation(AssertionalRelation):
+    """An AssertionalRelation additionally carrying an ontological spatial
+    property and/or a unary rectangle/block-algebra constraint."""
+
     def __init__(self, from_: str, to: str) -> None:
         super().__init__(from_, to)
         self._ontological_prop: Any = None

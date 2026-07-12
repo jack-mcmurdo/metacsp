@@ -14,6 +14,9 @@ __all__ = ["GeometricConstraint"]
 
 
 class GeometricConstraint(BinaryConstraint):
+    """A binary constraint over two Polygon-domain variables: disconnected (DC)
+    or one inside the other (INSIDE)."""
+
     class Type(Enum):
         # Explicit 0-based values matching Java's ordinal() indexing into
         # TRANSITION_TABLE.

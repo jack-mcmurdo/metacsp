@@ -41,6 +41,9 @@ def _contains(vertices: list[Vec2], x: float, y: float) -> bool:
 
 
 class GeometricConstraintSolver(RCC2ConstraintSolver):
+    """An RCC2ConstraintSolver extended with GeometricConstraint (DC/INSIDE)
+    checks based on Polygon collision detection."""
+
     # Min and max dimensions of the Euclidean space.
     MAX_X = MAX_X
     MAX_Y = MAX_Y

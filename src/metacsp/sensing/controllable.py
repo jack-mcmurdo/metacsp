@@ -18,6 +18,7 @@ class Controllable:
         self._symbols: list[str] = []
 
     def register_symbols_from_controllable_sensor(self, act: str) -> None:
+        """Register a symbol this Controllable can be commanded to take on."""
         self._symbols.append(act)
 
     @property

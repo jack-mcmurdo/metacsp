@@ -22,6 +22,7 @@ class WidestIntervalFirstValOH(ValueOrderingH):
     decreasing interval width -- widest (most flexible) first."""
 
     def compare(self, n1: ConstraintNetwork, n2: ConstraintNetwork) -> int:
+        """Negative/zero/positive as ``n1``'s disjunct is wider/equal/narrower than ``n2``'s."""
         cons0 = n1.get_constraints()
         cons1 = n2.get_constraints()
         con0 = cast(SimpleDistanceConstraint, cast(DistanceConstraint, cons0[0]).internal_constraints[0])  # type: ignore[index]

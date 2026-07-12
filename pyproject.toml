@@ -22,6 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 viz = ["dearpygui>=1.11"]
 dev = ["pytest>=7", "black>=24", "dearpygui>=1.11"]
+docs = ["mkdocs-material>=9.5", "mkdocstrings[python]>=0.24"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/metacsp"]

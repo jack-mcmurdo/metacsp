@@ -13,6 +13,8 @@ __all__ = ["Rectangle"]
 
 
 class Rectangle(Domain):
+    """The domain of a Region: a bounding rectangle's width/height and interval names."""
+
     def __init__(self, v: Region) -> None:
         super().__init__(v)
         self._width = 0

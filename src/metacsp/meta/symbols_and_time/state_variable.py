@@ -40,6 +40,7 @@ class StateVariable(Schedulable):
         self._set_allowed_states(allowed_states)
 
     def is_conflicting(self, peak: list[Activity]) -> bool:
+        """True iff the peak's two Activities share no allowed symbolic state."""
         if len(peak) != 2:
             return False
         sva0 = cast(SymbolicVariableActivity, peak[0].variable)
@@ -52,6 +53,7 @@ class StateVariable(Schedulable):
         return not intersection
 
     def draw(self, network: ConstraintNetwork) -> None:
+        """No-op: StateVariable has no dedicated visualization."""
         pass
 
     def _set_allowed_states(self, st: list[str]) -> None:
@@ -66,23 +68,29 @@ class StateVariable(Schedulable):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: StateVariable is not drawn as a graph edge."""
         return None
 
     def clone(self) -> StateVariable | None:
+        """Always None: StateVariable does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: StateVariable has no notion of equivalence."""
         return False
 
     @property
     def states(self) -> list[str]:
+        """The allowed symbolic states, sorted."""
         return self._states
 
     @states.setter
     def states(self, value: list[str]) -> None:
+        """Set the allowed symbolic states."""
         self._states = value
 
     def get_ground_solver(self) -> ConstraintSolver | None:
+        """Always None: StateVariable has no single ground solver of its own."""
         return None
 
     def get_meta_values_with_initial_time(

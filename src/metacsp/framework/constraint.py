@@ -42,12 +42,15 @@ class Constraint(ABC):
 
     @property
     def is_masked(self) -> bool:
+        """True iff this Constraint is masked (hidden from constraint-network views)."""
         return self.masked
 
     def mask(self) -> None:
+        """Mark this Constraint as masked."""
         self.masked = True
 
     def unmask(self) -> None:
+        """Unmark this Constraint, making it visible again."""
         self.masked = False
 
     @property
@@ -57,14 +60,17 @@ class Constraint(ABC):
         return all(v == one_var for v in self.scope[1:])
 
     def is_skippable_solver(self, cs: ConstraintSolver) -> bool:
+        """True iff ``cs`` was registered via :meth:`skip_solver` for this Constraint."""
         return self._solvers_to_skip is not None and cs in self._solvers_to_skip
 
     @property
     def annotation(self) -> Any:
+        """Arbitrary user-attached annotation."""
         return self._annotation
 
     @annotation.setter
     def annotation(self, value: Any) -> None:
+        """Set this Constraint's annotation."""
         self._annotation = value
 
     @abstractmethod
@@ -77,14 +83,18 @@ class Constraint(ABC):
 
     @property
     def scope(self) -> list[Variable]:
+        """The Variables this Constraint refers to."""
         return self._scope
 
     @scope.setter
     def scope(self, value: list[Variable]) -> None:
+        """Set this Constraint's scope."""
         self._scope = value
 
     @abstractmethod
-    def clone(self) -> Constraint: ...
+    def clone(self) -> Constraint:
+        """Return an independent copy of this Constraint."""
+        ...
 
     @abstractmethod
     def is_equivalent(self, c: Constraint) -> bool:
@@ -92,20 +102,25 @@ class Constraint(ABC):
 
     @property
     def description(self) -> str:
+        """Short human-readable description of this Constraint (defaults to the class name)."""
         return type(self).__name__
 
     @property
     def auto_removable(self) -> bool:
+        """True iff this Constraint should be removed automatically once it becomes irrelevant."""
         return self._auto_removable
 
     @auto_removable.setter
     def auto_removable(self, value: bool) -> None:
+        """Set whether this Constraint is auto-removable."""
         self._auto_removable = value
 
     @property
     def color(self) -> Any:
+        """Color used when rendering this Constraint."""
         return self._color
 
     @color.setter
     def color(self, value: Any) -> None:
+        """Set the color used when rendering this Constraint."""
         self._color = value

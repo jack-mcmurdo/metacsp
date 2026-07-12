@@ -59,9 +59,11 @@ class ConstraintSolver(ABC):
         self.register_value_choice_functions()
 
     def set_name(self, name: str) -> None:
+        """Set this solver's name."""
         self.name = name
 
     def set_options(self, *ops: ConstraintSolver.Options) -> None:
+        """Enable the given solver Options."""
         for op in ops:
             if op is ConstraintSolver.Options.AUTO_PROPAGATE:
                 self._autoprop = True
@@ -75,6 +77,7 @@ class ConstraintSolver(ABC):
                 self._domains_auto_instantiated = False
 
     def get_option(self, op: ConstraintSolver.Options) -> bool:
+        """True iff the given Option is currently in effect for this solver."""
         if op is ConstraintSolver.Options.AUTO_PROPAGATE:
             return self._autoprop
         if op is ConstraintSolver.Options.NO_PROP_ON_VAR_CREATION:
@@ -99,9 +102,11 @@ class ConstraintSolver(ABC):
     # --- adding constraints ---
 
     def add_constraint(self, c: Constraint) -> bool:
+        """Add a single Constraint, propagating immediately if auto-propagation is on."""
         return self.add_constraints(c)
 
     def add_constraint_no_propagation(self, c: Constraint) -> bool:
+        """Add a single Constraint without triggering propagation."""
         self._skip_propagation = True
         self.add_constraints(c)
         self._skip_propagation = False
@@ -119,6 +124,7 @@ class ConstraintSolver(ABC):
         return None
 
     def add_constraints_no_propagation(self, *c: Constraint) -> bool:
+        """Add a batch of Constraints without triggering propagation."""
         self._skip_propagation = True
         self.add_constraints(*c)
         self._skip_propagation = False
@@ -167,6 +173,7 @@ class ConstraintSolver(ABC):
     # --- removing constraints ---
 
     def remove_constraint(self, c: Constraint | None) -> None:
+        """Remove a single Constraint (no-op if ``c`` is None)."""
         if c is not None:
             self.remove_constraints([c])
 
@@ -196,9 +203,11 @@ class ConstraintSolver(ABC):
     # --- creating variables ---
 
     def create_variable(self, component: str | None = None) -> Variable:
+        """Create a single Variable, optionally tagged with a component."""
         return self.create_variables(1, component)[0]  # type: ignore[index]
 
     def create_variables(self, num: int, component: str | None = None) -> list[Variable] | None:
+        """Create a batch of Variables, optionally tagged with a component."""
         ret = self.create_variables_sub_component(num, component)
         if ret is None:
             return None
@@ -254,6 +263,7 @@ class ConstraintSolver(ABC):
     # --- removing variables ---
 
     def remove_variable(self, v: Variable) -> None:
+        """Remove a single Variable, along with any incident auto-removable constraints."""
         self.remove_variables([v])
 
     def _remove_dummy_constraint(self, c: DummyConstraint) -> Constraint | None:
@@ -263,6 +273,8 @@ class ConstraintSolver(ABC):
         return self.the_network.find_hyperedge_constraint(dv)
 
     def remove_variables(self, v: list[Variable]) -> None:
+        """Remove a batch of Variables, along with any incident auto-removable constraints
+        and any dependent variables (recursively, via their own solvers)."""
         incident_revised: dict[Constraint, None] = {}
         solvers_to_dep_vars: dict[ConstraintSolver, list[Variable]] = {}
 
@@ -308,16 +320,20 @@ class ConstraintSolver(ABC):
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The ConstraintNetwork this solver maintains."""
         return self.the_network
 
     @constraint_network.setter
     def constraint_network(self, new_cn: ConstraintNetwork) -> None:
+        """Replace this solver's ConstraintNetwork."""
         self.the_network = new_cn
 
     def get_variable(self, id: int) -> Variable | None:
+        """The Variable with the given id, if it is in this solver's network."""
         return self.the_network.get_variable(id)
 
     def get_id(self, var: Variable) -> int:
+        """The index of the given Variable in :meth:`get_variables`, or -1 if not found."""
         for i, v in enumerate(self.get_variables()):
             if v == var:
                 return i
@@ -326,6 +342,8 @@ class ConstraintSolver(ABC):
     def get_variables(
         self, component: str | None = None, *markings_to_exclude: Any
     ) -> list[Variable]:
+        """All Variables in this solver, or those tagged with a given component
+        (excluding any whose marking is in ``markings_to_exclude``)."""
         if component is None:
             return self.the_network.get_variables()
         ret = self._components.get(component)
@@ -343,6 +361,7 @@ class ConstraintSolver(ABC):
     def get_constraints(
         self, from_: Variable | None = None, to: Variable | None = None
     ) -> list[Constraint]:
+        """All Constraints in this solver's network, or those directly between two Variables."""
         if from_ is None and to is None:
             return self.the_network.get_constraints()
         return [
@@ -352,6 +371,7 @@ class ConstraintSolver(ABC):
         ]
 
     def get_component(self, v: Variable) -> str | None:
+        """Name of the component the given Variable is tagged with, if any."""
         for name, vars_ in self._components.items():
             if v in vars_:
                 return name
@@ -362,6 +382,7 @@ class ConstraintSolver(ABC):
 
     @property
     def description(self) -> str:
+        """Human-readable description of this solver, its Variable type, and Constraint types."""
         spacer = ConstraintSolver.spacing * ConstraintSolver.nesting
         ret = f"{spacer}[{type(self).__name__} vars: [{self.variable_type.__name__}] constraints: ["
         ret += "".join(c.__name__ for c in self.constraint_types)
@@ -374,17 +395,22 @@ class ConstraintSolver(ABC):
 
     @property
     def components(self) -> dict[str, list[Variable]]:
+        """Mapping from component name to the Variables tagged with it."""
         return self._components
 
     @components.setter
     def components(self, value: dict[str, list[Variable]]) -> None:
+        """Replace this solver's component-to-Variables mapping."""
         self._components = value
 
     def contains_variable(self, v: Variable) -> bool:
+        """True iff the given Variable is in this solver's network."""
         return self.the_network.contains_variable(v)
 
     @abstractmethod
-    def register_value_choice_functions(self) -> None: ...
+    def register_value_choice_functions(self) -> None:
+        """Register this solver's Domain subclasses' ValueChoiceFunctions, if any."""
+        ...
 
     def mask_constraints(self, constraints: list[Constraint]) -> None:
         """Hook called before propagation with the constraints being added;

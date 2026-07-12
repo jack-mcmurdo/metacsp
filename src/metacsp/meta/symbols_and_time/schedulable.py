@@ -194,6 +194,7 @@ class Schedulable(MetaConstraint):
         return ret
 
     def get_meta_variables(self) -> list[ConstraintNetwork]:
+        """Collect conflicting peaks of overlapping Activities, using the configured strategy."""
         if self.peak_collection_strategy is Schedulable.PEAKCOLLECTION.SAMPLING:
             return self._sampling_peak_collection()
         if self.peak_collection_strategy is Schedulable.PEAKCOLLECTION.BINARY:
@@ -201,6 +202,7 @@ class Schedulable(MetaConstraint):
         return self._complete_peak_collection()
 
     def get_meta_values(self, meta_variable: MetaVariable) -> list[ConstraintNetwork] | None:
+        """Precedence-constraint resolvers for a conflicting peak, ordered by the ESTA heuristic."""
         conflict = meta_variable.constraint_network
         assert conflict is not None
         mcs_info = self.get_ordered_mcss(conflict)
@@ -328,6 +330,7 @@ class Schedulable(MetaConstraint):
         )
 
     def mark_resolved_sub(self, con: MetaVariable, meta_value: ConstraintNetwork) -> None:
+        """No-op: Schedulable needs no extra bookkeeping when a peak is resolved."""
         pass
 
     @abstractmethod
@@ -336,6 +339,7 @@ class Schedulable(MetaConstraint):
         overuses a shared resource)."""
 
     def set_usage(self, *acts: Activity) -> None:
+        """Register Activities as users of this Schedulable's resource."""
         if self.activities is None:
             self.activities = []
         for act in acts:
@@ -343,6 +347,7 @@ class Schedulable(MetaConstraint):
                 self.activities.append(act)
 
     def remove_usage(self, *acts: Activity) -> None:
+        """Unregister Activities as users of this Schedulable's resource."""
         if self.activities is not None:
             for act in acts:
                 if act in self.activities:
@@ -350,4 +355,5 @@ class Schedulable(MetaConstraint):
 
     @property
     def activity_on_use(self) -> list[Activity] | None:
+        """The Activities currently registered as users of this Schedulable's resource."""
         return self.activities

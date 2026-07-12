@@ -30,6 +30,7 @@ class TCSPLabeling(MetaConstraint):
         super().__init__(var_oh, val_oh)
 
     def get_meta_variables(self) -> list[ConstraintNetwork]:
+        """One MetaVariable per DistanceConstraint not yet committed to a single disjunct."""
         dcn = self.get_ground_solver().constraint_network
         ret: list[ConstraintNetwork] = []
         for con in dcn.get_constraints():
@@ -44,6 +45,7 @@ class TCSPLabeling(MetaConstraint):
         return ret
 
     def get_meta_values(self, meta_variable: MetaVariable) -> list[ConstraintNetwork]:
+        """One meta value per disjunct of the DistanceConstraint being labeled."""
         conflict = meta_variable.constraint_network
         assert conflict is not None
         cons = conflict.get_constraints()
@@ -71,9 +73,11 @@ class TCSPLabeling(MetaConstraint):
         return type(self).__name__
 
     def draw(self, network: ConstraintNetwork) -> None:
+        """No-op: TCSPLabeling has no dedicated visualization."""
         pass
 
     def mark_resolved_sub(self, con: MetaVariable, meta_value: ConstraintNetwork) -> None:
+        """Re-enable immediate propagation for the now-labeled DistanceConstraint."""
         assert con.constraint_network is not None
         dcs = con.constraint_network.get_constraints()
         mc = cast(MultiConstraint, dcs[0])
@@ -81,14 +85,18 @@ class TCSPLabeling(MetaConstraint):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: TCSPLabeling is not drawn as a graph edge."""
         return None
 
     def clone(self) -> TCSPLabeling | None:
+        """Always None: TCSPLabeling does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: TCSPLabeling has no notion of equivalence."""
         return False
 
     def get_ground_solver(self) -> ConstraintSolver:
+        """The domain's single ground solver (the meta-solver's DistanceConstraintSolver)."""
         assert self.meta_cs is not None
         return self.meta_cs.constraint_solvers[0]

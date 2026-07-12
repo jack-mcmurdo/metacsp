@@ -152,41 +152,52 @@ class TrajectoryEnvelopeScheduler(MetaConstraintSolver):
     # --- backtracking search hooks ---
 
     def pre_backtrack(self) -> None:
+        """No-op: TrajectoryEnvelopeScheduler needs no extra bookkeeping before branching."""
         pass
 
     def retract_resolver_sub(
         self, meta_variable: ConstraintNetwork, meta_value: ConstraintNetwork
     ) -> None:
+        """No-op: TrajectoryEnvelopeScheduler needs no extra bookkeeping when retracting."""
         pass
 
     def add_resolver_sub(
         self, meta_variable: ConstraintNetwork, meta_value: ConstraintNetwork
     ) -> bool:
+        """Always True: resolvers are always accepted before ground-CSP propagation."""
         return True
 
     @property
     def bt_counter(self) -> int:
+        """Number of backtracking steps taken so far."""
         return self._bt_counter
 
     def post_backtrack(self, mv: MetaVariable) -> None:
+        """Increment the backtracking step counter."""
         self._bt_counter += 1
 
     def get_upper_bound(self) -> float:
+        """Always 0.0: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         return 0.0
 
     def set_upper_bound(self) -> None:
+        """No-op: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         pass
 
     def get_lower_bound(self) -> float:
+        """Always 0.0: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         return 0.0
 
     def set_lower_bound(self) -> None:
+        """No-op: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         pass
 
     def has_conflict_clause(self, meta_value: ConstraintNetwork) -> bool:
+        """Always False: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         return False
 
     def reset_false_clause(self) -> None:
+        """No-op: TrajectoryEnvelopeScheduler does not support branch-and-bound optimization."""
         pass
 
     # --- refinement ---

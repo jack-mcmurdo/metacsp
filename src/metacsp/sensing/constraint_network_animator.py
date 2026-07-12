@@ -108,6 +108,7 @@ class ConstraintNetworkAnimator:
             self._thread.start()
 
     def add_periodic_callbacks(self, *callbacks: PeriodicCallback) -> None:
+        """Register callables invoked once per un-paused tick, after the InferenceCallback."""
         if self._pcbs is None:
             self._pcbs = []
         self._pcbs.extend(callbacks)
@@ -116,24 +117,30 @@ class ConstraintNetworkAnimator:
         return time.time_ns() // 1_000_000
 
     def set_inference_callback(self, cb: InferenceCallback) -> None:
+        """Set the callable invoked once per un-paused tick (e.g. to trigger a planner run)."""
         self._cb = cb
 
     def set_auto_clean_finished_variables(self, ac: bool) -> None:
+        """Set whether finished activities' variables are automatically removed."""
         self._auto_clean = ac
 
     def is_unknown(self, act: SymbolicVariableActivity) -> bool:
+        """True iff the Dispatcher does not know about the given activity."""
         assert self._dis is not None
         return any(activity == act for activity in self._dis.get_activities())
 
     def is_in_state(self, act: SymbolicVariableActivity, st: Dispatcher.ACTIVITY_STATE) -> bool:
+        """True iff the given activity is currently in the given dispatching state."""
         assert self._dis is not None
         return any(dis_act == act for dis_act in self._dis.get_acts_in_state(st))
 
     def is_started(self, act: SymbolicVariableActivity) -> bool:
+        """True iff the given activity has been dispatched (started)."""
         assert self._dis is not None
         return any(started_act == act for started_act in self._dis.get_started_acts())
 
     def is_finished(self, act: SymbolicVariableActivity) -> bool:
+        """True iff the given activity has finished dispatching."""
         assert self._dis is not None
         return any(finished_act == act for finished_act in self._dis.get_finished_acts())
 
@@ -189,28 +196,34 @@ class ConstraintNetworkAnimator:
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The ConstraintNetwork of this animator's ActivityNetworkSolver."""
         return self.cn
 
     @property
     def activity_network_solver(self) -> ActivityNetworkSolver:
+        """The ActivityNetworkSolver this animator drives."""
         return self.ans
 
     def post_sensor_value_to_dispatch(self, sensor: Sensor, time: int, value: str) -> None:
+        """Queue a single sensor reading to be applied on a future tick."""
         with _solver_lock(self.ans):
             self._sensor_values.setdefault(sensor, {})[time] = value
 
     def post_controllable_value_to_dispatch(
         self, controllable: Controllable, time: int, value: str
     ) -> None:
+        """Queue a single controllable-component value to be applied on a future tick."""
         with _solver_lock(self.ans):
             self._controllable_values.setdefault(controllable, {})[time] = value
 
     def register_sensor_values_to_dispatch(self, sensor: Sensor, values: dict[int, str]) -> None:
+        """Replace the full queue of pending readings for a sensor."""
         self._sensor_values[sensor] = values
 
     def register_controllable_values_to_dispatch(
         self, controllable: Controllable, values: dict[int, str]
     ) -> None:
+        """Replace the full queue of pending values for a controllable component."""
         self._controllable_values[controllable] = values
 
     def add_dispatching_functions(
@@ -238,12 +251,15 @@ class ConstraintNetworkAnimator:
 
     @property
     def time_now(self) -> int:
+        """The current time, mapped into this animator's STP's time frame."""
         return self._get_current_time_in_millis() - self._first_tick + self._origin_of_time
 
     def set_paused(self, paused: bool) -> None:
+        """Pause or resume ticking (sensor animation, callbacks, and Future's advance)."""
         self._paused = paused
 
     def teardown(self) -> None:
+        """Stop this animator's background thread (and its Dispatcher, if any)."""
         self._teardown = True
 
     def _run(self) -> None:
@@ -303,4 +319,5 @@ class ConstraintNetworkAnimator:
 
     @property
     def dispatcher(self) -> Dispatcher | None:
+        """This animator's Dispatcher, once created by :meth:`add_dispatching_functions`."""
         return self._dis

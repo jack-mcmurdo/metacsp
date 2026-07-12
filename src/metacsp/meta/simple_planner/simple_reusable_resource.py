@@ -38,6 +38,7 @@ class SimpleReusableResource(Schedulable):
         self.name = name
 
     def is_conflicting(self, peak: list[Activity]) -> bool:
+        """True iff the peak's total resource usage (per the SimpleDomain) exceeds capacity."""
         total = 0
         for act in peak:
             total += self.rd.get_resource_usage_level(self, act.variable)
@@ -46,6 +47,7 @@ class SimpleReusableResource(Schedulable):
         return False
 
     def draw(self, network: ConstraintNetwork) -> None:
+        """No-op: SimpleReusableResource has no dedicated visualization."""
         pass
 
     def __str__(self) -> str:
@@ -53,13 +55,17 @@ class SimpleReusableResource(Schedulable):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: SimpleReusableResource is not drawn as a graph edge."""
         return None
 
     def clone(self) -> SimpleReusableResource | None:
+        """Always None: SimpleReusableResource does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: SimpleReusableResource has no notion of equivalence."""
         return False
 
     def get_ground_solver(self) -> ConstraintSolver | None:
+        """Always None: SimpleReusableResource has no single ground solver of its own."""
         return None

@@ -21,6 +21,9 @@ __all__ = ["SpatialRule"]
 
 
 class SpatialRule:
+    """A named spatial rule pairing a SpatialAssertionalRelation with exactly one
+    of a unary rectangle/block constraint or a binary rectangle/block-algebra constraint."""
+
     def __init__(
         self,
         from_: str,

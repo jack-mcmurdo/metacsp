@@ -36,6 +36,7 @@ class Bounds:
 
     @property
     def is_singleton(self) -> bool:
+        """True iff ``min == max``."""
         return self.min == self.max
 
     def __eq__(self, other: object) -> bool:
@@ -61,9 +62,11 @@ class Bounds:
         return None
 
     def is_intersecting(self, b: Bounds) -> bool:
+        """True iff this Bounds and ``b`` overlap (per :meth:`intersect_strict`)."""
         return self.intersect_strict(b) is not None
 
     def intersect(self, b: Bounds) -> Bounds | None:
+        """Intersection of this Bounds and ``b``, or None if they don't overlap."""
         _min = max(self.min, b.min)
         _max = min(self.max, b.max)
         if _min <= _max:
@@ -72,6 +75,7 @@ class Bounds:
 
     @staticmethod
     def union(*b: Bounds) -> Bounds | None:
+        """The Bounds spanning [min of all mins, max of all maxes], or None if empty/invalid."""
         _min = INF - 1
         _max = -INF + 1
         for bounds in b:
@@ -82,6 +86,8 @@ class Bounds:
         return None
 
     def compare_to(self, o: Bounds) -> int:
+        """Ordering comparison used by :meth:`__lt__`, sensitive to both min and max."""
+
         def signum(x: int) -> int:
             return (x > 0) - (x < 0)
 

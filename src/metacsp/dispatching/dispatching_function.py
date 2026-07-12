@@ -27,6 +27,7 @@ class DispatchingFunction(ABC):
         self._dis: Dispatcher | None = None
 
     def register_dispatcher(self, dis: Dispatcher) -> None:
+        """Attach this DispatchingFunction to the Dispatcher managing it."""
         self._dis = dis
 
     @abstractmethod
@@ -40,14 +41,17 @@ class DispatchingFunction(ABC):
         ``act``; returning True opts it out of dispatching entirely."""
 
     def finish(self, *acts: SymbolicVariableActivity) -> None:
+        """Mark the given activities as finishing dispatch."""
         assert self._dis is not None
         self._dis.finish(*acts)
 
     @property
     def constraint_network(self) -> ConstraintNetwork:
+        """The ConstraintNetwork of the owning Dispatcher's ActivityNetworkSolver."""
         assert self._dis is not None
         return self._dis.constraint_network
 
     @property
     def dispatcher(self) -> Dispatcher | None:
+        """The Dispatcher this DispatchingFunction is registered with, if any."""
         return self._dis

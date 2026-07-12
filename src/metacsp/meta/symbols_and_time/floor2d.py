@@ -35,6 +35,7 @@ class Floor2D(Schedulable):
         self.distance_threshold = distance_threshold
 
     def is_conflicting(self, peak: list[Activity]) -> bool:
+        """True iff the peak's two Activities' 2D coordinates are within the distance threshold."""
         if len(peak) == 1:
             return False
         sva0 = cast(SymbolicVariableActivity, peak[0].variable)
@@ -69,18 +70,23 @@ class Floor2D(Schedulable):
 
     @property
     def edge_label(self) -> str | None:
+        """Always None: Floor2D is not drawn as a graph edge."""
         return None
 
     def clone(self) -> Floor2D | None:
+        """Always None: Floor2D does not support cloning."""
         return None
 
     def is_equivalent(self, c: Constraint) -> bool:
+        """Always False: Floor2D has no notion of equivalence."""
         return False
 
     def get_ground_solver(self) -> ConstraintSolver | None:
+        """Always None: Floor2D has no single ground solver of its own."""
         return None
 
     def get_meta_values(self, meta_variable: MetaVariable) -> list[ConstraintNetwork] | None:
+        """Always None: Floor2D conflicts are never resolvable (unfinished upstream)."""
         # Java overrides Schedulable's getMetaValues() with an unfinished
         # "TODO Auto-generated method stub" that always returns null --
         # reproduced verbatim: Floor2D conflicts are never resolvable.
