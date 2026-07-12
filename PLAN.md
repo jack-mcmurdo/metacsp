@@ -27,7 +27,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M18 — hybrid planner
 - [x] M19 — sensing & dispatching
 - [x] M20 — online monitoring
-- [ ] M21 — serialization, plotting, viz protocol doc
+- [x] M21 — serialization, plotting, viz protocol doc
 - [ ] M22 — examples sweep & README
 - [ ] M23 — tutorial demos (meta-csp-tutorial repo)
 
@@ -395,26 +395,26 @@ black-formatted (line length 100).
 - **Acceptance:** tests green.
 
 ### M21 — Serialization, live viz (dearpygui), protocol doc
-- [ ] `metacsp/serialization.py`: `network_to_dict(net)` →
+- [x] `metacsp/serialization.py`: `network_to_dict(net)` →
       `{"variables": [{"id", "class", "domain": str}], "constraints": [{"class", "from",
       "to", "label": str}]}`; `timeline_to_dict`, `trajectory_envelope_to_dict` (GeoJSON-style
       geometry); `SnapshotPublisher(solver, period_ms, callback)` — a D9-style thread that
       calls `callback(json_str)` each period (the Java `TimelinePublisher`/
       `TimelineVisualizer` loop, minus Swing); delta events wired to D2 listeners.
-- [ ] `metacsp/viz/` (`dearpygui`, `viz` extra, import-guarded so `metacsp` works headless):
+- [x] `metacsp/viz/` (`dearpygui`, `viz` extra, import-guarded so `metacsp` works headless):
       `metacsp/viz/timeline.py` — a live Gantt/timeline window equivalent to
       `utility/timelinePlotting` + `PlotActivityNetworkGantt`, redrawing as the underlying
       `ConstraintNetwork` fires D2 change events (or on each `SnapshotPublisher` tick).
       `metacsp/viz/app.py` — thin `dearpygui` app/window bootstrap (create context, viewport,
       render loop) reused by other live views added in later milestones (e.g. a geometry/
       trajectory canvas).
-- [ ] `docs/VIZ.md`: document the JSON snapshot + delta message schema, and the intended future
+- [x] `docs/VIZ.md`: document the JSON snapshot + delta message schema, and the intended future
       browser stack (WebSocket server pushing `SnapshotPublisher` output + delta events to a
       WebGL/canvas viewer) as follow-on work distinct from the now-in-scope dearpygui viewer.
       **Browser viewer itself: future work, out of scope.**
-- [ ] `tests/test_serialization.py`: round-trip a small activity network to dict, assert
+- [x] `tests/test_serialization.py`: round-trip a small activity network to dict, assert
       schema keys and delta events fire.
-- [ ] `tests/test_viz.py`: import-guard test — `metacsp.viz` is importable and raises a clear
+- [x] `tests/test_viz.py`: import-guard test — `metacsp.viz` is importable and raises a clear
       `ImportError`-derived message (not ported, but tested for) only when `dearpygui` is
       absent; when present, build a timeline window headlessly (create context, populate,
       destroy context, no `show_viewport`) and assert no exceptions.
