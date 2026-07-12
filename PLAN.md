@@ -15,7 +15,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M6 — Allen intervals & activities
 - [x] M7 — symbolic variables & multi TCSP
 - [x] M8 — Boolean SAT
-- [ ] M9 — fuzzy solvers
+- [x] M9 — fuzzy solvers
 - [ ] M10 — spatial geometry & geometric constraint solving
 - [ ] M11 — RCC, cardinal, reachability
 - [ ] M12 — DE9IM spatial relations
@@ -291,10 +291,11 @@ black-formatted (line length 100).
 - **Acceptance:** SAT/UNSAT verdicts match the Java assertions.
 
 ### M9 — Fuzzy solvers
-- [ ] `metacsp/fuzzy_symbols/`, `metacsp/fuzzy_allen_interval/`,
+- [x] `metacsp/fuzzy_symbols/`, `metacsp/fuzzy_allen_interval/`,
       `metacsp/multi/fuzzy_activity/`, `metacsp/multi/fuzzy_set_activity/`.
-- [ ] Port Java `tests/{TestFuzzyAllenIntervalNetworkSolver,
-      TestFuzzySymbolicVariableConstraintSolver}.java` → pytest; port the 2 fuzzy examples.
+- [x] Port Java `tests/{TestFuzzyAllenIntervalNetworkSolver,
+      TestFuzzySymbolicVariableConstraintSolver}.java` → pytest; port the 2 fuzzy examples
+      (plus the 2 `examples/multi/TestFuzzy{Activity,SetActivity}NetworkSolver.java`).
 - **Acceptance:** possibility degrees match the Java assertions.
 
 ### M10 — Spatial geometry & geometric constraint solving
