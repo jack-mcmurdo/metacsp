@@ -744,9 +744,10 @@ class SimpleDomain(MetaConstraint):
         """Parse a domain file (see ``tests/data/domains/testSimplePlanner.ddl``
         for an example), instantiate the necessary MetaConstraints, and add
         them to the given SimplePlanner."""
-        # Local import to avoid a module cycle: ProactivePlanningDomain
-        # subclasses SimpleDomain.
+        # Local imports to avoid module cycles: ProactivePlanningDomain (M16)
+        # and FluentBasedSimpleDomain (M18) both subclass SimpleDomain.
         from metacsp.meta.simple_planner.proactive_planning_domain import ProactivePlanningDomain
+        from metacsp.meta.hybrid_planner.fluent_based_simple_domain import FluentBasedSimpleDomain
 
         logger = get_logger(SimpleDomain)
         try:
@@ -785,6 +786,8 @@ class SimpleDomain(MetaConstraint):
             dom = SimpleDomain(resource_caps, resource_names, name, everything)
         elif domain_type is ProactivePlanningDomain:
             dom = ProactivePlanningDomain(resource_caps, resource_names, name, everything)
+        elif domain_type is FluentBasedSimpleDomain:
+            dom = FluentBasedSimpleDomain(resource_caps, resource_names, name, everything)
 
         if dom is None:
             return None

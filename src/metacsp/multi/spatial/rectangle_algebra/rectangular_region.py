@@ -3,8 +3,18 @@
 The Java class also carries ``getOntologicalProp``/``setOntologicalProp``,
 backed by ``multi.spatial.rectangleAlgebraNew.toRemove.OntologicalSpatialProperty``.
 Per PLAN.md's skip list, ``rectangleAlgebraNew`` (dead code marked for
-upstream removal) is not ported, so those two methods -- unused by anything
-in scope through M13 -- are omitted here as well.
+upstream removal) is not ported. Through M13 those two accessors were unused
+and omitted; M18 (``meta/hybridPlanner/``) does call them -- including
+unconditionally, on every RectangularRegion, without a null check -- so they
+are added here as a plain ``ontological_prop`` property typed ``Any``,
+following the same pattern already established for
+:class:`~metacsp.spatial.utility.spatial_assertional_relation.SpatialAssertionalRelation.ontological_prop`
+(M11): it simply carries whatever object is set on it. Java's
+``RectangularRegion`` constructor defaults this field to
+``new OntologicalSpatialProperty()`` (whose own fields default to
+``isGraspable=true, isMovable=true, isObstacle=false``); this port matches
+that by defaulting to a minimal placeholder with those same three
+attributes, rather than ``None`` (which M18 code would otherwise crash on).
 """
 
 from __future__ import annotations
@@ -28,6 +38,19 @@ if TYPE_CHECKING:
 __all__ = ["RectangularRegion"]
 
 
+class _DefaultOntologicalProp:
+    """Minimal stand-in for the skipped, dead-code
+    ``multi/spatial/rectangleAlgebraNew/toRemove/OntologicalSpatialProperty.java``
+    -- just its three boolean fields, with Java's own default values."""
+
+    def __init__(
+        self, is_graspable: bool = True, is_movable: bool = True, is_obstacle: bool = False
+    ) -> None:
+        self.is_graspable = is_graspable
+        self.is_movable = is_movable
+        self.is_obstacle = is_obstacle
+
+
 class RectangularRegion(MultiVariable):
     """A MultiVariable representing an axis-parallel rectangle: a pair of
     AllenIntervals (one per axis), managed by a
@@ -42,9 +65,18 @@ class RectangularRegion(MultiVariable):
     ) -> None:
         super().__init__(cs, id, internal_solvers, internal_vars)
         self.name = ""
+        self._ontological_prop: Any = _DefaultOntologicalProp()
 
     def create_internal_constraints(self, variables: list[Variable]) -> list[Constraint] | None:
         return None
+
+    @property
+    def ontological_prop(self) -> Any:
+        return self._ontological_prop
+
+    @ontological_prop.setter
+    def ontological_prop(self, value: Any) -> None:
+        self._ontological_prop = value
 
     @property
     def domain(self) -> Domain:
