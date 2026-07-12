@@ -18,7 +18,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M9 — fuzzy solvers
 - [x] M10 — spatial geometry & geometric constraint solving
 - [x] M11 — RCC, cardinal, reachability
-- [ ] M12 — DE9IM spatial relations
+- [x] M12 — DE9IM spatial relations
 - [ ] M13 — rectangle, block & temporal-rectangle algebras
 - [ ] M14 — trajectory envelopes
 - [ ] M15 — meta TCSP & resource schedulers
