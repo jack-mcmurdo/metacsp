@@ -13,21 +13,60 @@ and sympy (CNF conversion).
 ## Install
 
 ```bash
-pip install -e ".[dev]"      # development (tests, formatter)
-pip install -e ".[viz]"      # optional matplotlib plotting
+pip install -e ".[dev]"      # development (tests, formatter, dearpygui)
+pip install -e ".[viz]"      # optional live viewer (dearpygui) only
 ```
 
-## Usage
+## Quickstart
 
-Runnable demos live in `examples/` — plain Python scripts, e.g.:
+```python
+from metacsp.time.apsp_solver import APSPSolver
+from metacsp.time.simple_distance_constraint import SimpleDistanceConstraint
+
+solver = APSPSolver(0, 1000)
+a, b = solver.create_variables(2)
+c = SimpleDistanceConstraint()
+c.minimum, c.maximum = 10, 20
+c.from_ = a
+c.to = b
+print("Consistent?", solver.add_constraint(c))
+```
+
+Runnable demos live in `examples/` — plain, standalone Python scripts, e.g.:
 
 ```bash
 python examples/test_apsp_solver.py
 ```
 
+`examples/SKIPPED.md` lists the handful of upstream Java examples that could not be
+meaningfully ported (Swing-only, dead upstream code, or missing fixtures), each with a
+one-line reason.
+
 ## Status
 
-Under construction. The port is executed phase by phase per [PLAN.md](PLAN.md).
+| Feature area | Java package | Python module |
+|---|---|---|
+| Utilities (logging, math, graph) | `utility/` | `metacsp.utility` |
+| Framework core & meta-CSP search | `framework/` | `metacsp.framework` |
+| Simple temporal problems (STP/APSP) | `time/` | `metacsp.time` |
+| Allen interval algebra (crisp & fuzzy) | `multi/allenInterval/`, `fuzzyAllenInterval/` | `metacsp.multi.allen_interval`, `metacsp.fuzzy_allen_interval` |
+| Activities & timelines | `multi/activity/` | `metacsp.multi.activity` |
+| Symbolic variables & Boolean SAT | `multi/symbols/`, `booleanSAT/` | `metacsp.multi.symbols`, `metacsp.boolean_sat` |
+| Spatial geometry & constraint solving | `spatial/geometry/` | `metacsp.spatial.geometry` |
+| RCC, cardinal direction, reachability | `spatial/{RCC,cardinal,reachability}/` | `metacsp.spatial.{rcc,cardinal,reachability}` |
+| DE9IM spatial relations | `multi/spatial/DE9IM/` | `metacsp.multi.spatial.de9im` |
+| Rectangle/block/temporal-rectangle algebras | `multi/spatial/{rectangleAlgebra,blockAlgebra}/` | `metacsp.multi.spatial.{rectangle_algebra,block_algebra}` |
+| Trajectory envelopes | `multi/spatioTemporal/` | `metacsp.multi.spatio_temporal` |
+| Meta TCSP & resource schedulers | `meta/TCSP/`, `meta/symbolsAndTime/` | `metacsp.meta.tcsp`, `metacsp.meta.symbols_and_time` |
+| Simple planner & hybrid planner | `meta/simplePlanner/`, `meta/hybridPlanner/` | `metacsp.meta.simple_planner`, `metacsp.meta.hybrid_planner` |
+| Trajectory envelope scheduler | `meta/spatioTemporal/paths/` | `metacsp.meta.spatio_temporal.paths` |
+| Sensing & dispatching | `sensing/`, `dispatching/` | `metacsp.sensing`, `metacsp.dispatching` |
+| Online monitoring (fuzzy hypothesis inference) | `onLineMonitoring/` | `metacsp.online_monitoring` |
+| JSON serialization (snapshot/delta) | — (new) | `metacsp.serialization` |
+| Live viewer (dearpygui, replaces Swing) | `utility/UI/`, `utility/timelinePlotting/` | `metacsp.viz` (`viz` extra) |
+
+Full milestone-by-milestone status, architecture decisions, and porting conventions are in
+[PLAN.md](PLAN.md).
 
 ## License
 

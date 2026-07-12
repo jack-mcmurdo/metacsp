@@ -158,6 +158,34 @@ class TestConstraintNetwork:
         assert not net.contains_variable(v1)
         assert set(net.get_variables()) == {v2}
 
+    def test_save_load_round_trips_cyclic_multi_variable_network(self, tmp_path):
+        # Regression test (C10): a MultiVariable's internal variables each
+        # hold a reference back to their own internal ConstraintSolver,
+        # whose ConstraintNetwork graph stores those same variables as dict
+        # keys -- a reference cycle. Variable.__hash__ uses self.id, and
+        # pickle's default reconstruction (bare __new__, then populate
+        # __dict__) leaves id unset while such a cycle is still being
+        # resolved, so hashing a not-yet-reconstructed Variable used as a
+        # dict key used to raise AttributeError. Variable.__reduce__ fixes
+        # this by passing id as a constructor argument, set the instant the
+        # object is created. Exercise it here through a real MultiVariable
+        # (ActivityNetworkSolver), where the cycle actually occurs.
+        from metacsp.multi.activity.activity_network_solver import ActivityNetworkSolver
+        from metacsp.multi.activity.symbolic_variable_activity import SymbolicVariableActivity
+
+        solver = ActivityNetworkSolver(0, 100, ["A", "B"])
+        act = solver.create_variable()
+        assert isinstance(act, SymbolicVariableActivity)
+        act.set_symbolic_domain("A", "B")
+
+        path = tmp_path / "network.pickle"
+        solver.constraint_network.save(path)
+        loaded = ConstraintNetwork.load(path)
+
+        assert [v.id for v in loaded.get_variables()] == [
+            v.id for v in solver.constraint_network.get_variables()
+        ]
+
     def test_binary_constraint_add_remove(self):
         # Uses _TestVariable rather than DummyVariable here because
         # get_neighboring_variables() always returns [] for a DummyVariable

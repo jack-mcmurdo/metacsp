@@ -54,3 +54,6 @@ class SimplePlannerInferenceCallback:
                 if var is not None:
                     act = cast(SymbolicVariableActivity, cn.get_substitution(var))
                     self.domain.set_old_inference(cast(str, act.component), act)
+
+    def __call__(self, time_now: int) -> None:
+        self.do_inference(time_now)

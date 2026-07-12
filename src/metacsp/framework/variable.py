@@ -150,6 +150,23 @@ class Variable(ABC):
     def __hash__(self) -> int:
         return self.id
 
+    def __reduce__(self) -> tuple[Any, tuple[Any, Any], dict[str, Any]]:
+        """Custom pickling (C10): sets ``self.id`` the instant the object is
+        reconstructed, before any of its ``__dict__`` is unpickled.
+
+        Networks routinely have reference cycles through a Variable's own
+        ``_solver`` (solver -> constraint_network -> graph -> vertices ->
+        this same Variable, used as a dict key). Pickle's default
+        reconstruction (``cls.__new__(cls)`` then populate ``__dict__``)
+        leaves ``id`` unset while such a cycle is still being resolved, so
+        if this Variable is encountered as a dict/set key mid-cycle,
+        ``__hash__`` (above) raises ``AttributeError``. Passing ``id`` as a
+        constructor argument here means it is set immediately on
+        reconstruction, before any nested state (and thus any such cycle)
+        is unpickled.
+        """
+        return (_unpickle_variable, (type(self), self.id), self.__dict__)
+
     @abstractmethod
     def __lt__(self, other: Variable) -> bool: ...
 
@@ -164,3 +181,9 @@ class Variable(ABC):
     @color.setter
     def color(self, c: Any) -> None:
         self._color = c
+
+
+def _unpickle_variable(cls: type[Variable], id: int) -> Variable:
+    obj = cls.__new__(cls)
+    obj.id = id
+    return obj
