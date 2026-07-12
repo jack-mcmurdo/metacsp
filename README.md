@@ -13,8 +13,8 @@ and sympy (CNF conversion).
 ## Install
 
 ```bash
-pip install -e ".[dev]"      # development (tests, formatter, dearpygui)
-pip install -e ".[viz]"      # optional live viewer (dearpygui) only
+pip install -e ".[dev]"      # development (tests, formatter, viz server deps)
+pip install -e ".[viz]"      # optional live viewer only
 ```
 
 ## Quickstart
@@ -48,6 +48,24 @@ the library the way a robot integration would.
 meaningfully ported (Swing-only, dead upstream code, or missing fixtures), each with a
 one-line reason.
 
+## Live viewer
+
+![MetaCSP Viewer screenshot](docs/assets/viz-screenshot.png)
+
+A browser-based live Gantt view of any solver's activity timelines, backed by a websocket
+server (see [`docs/VIZ.md`](docs/VIZ.md) for the wire protocol):
+
+```python
+from metacsp.viz import serve
+
+server = serve(solver, ["Robot1", "Robot2"])  # opens a browser tab
+```
+
+```bash
+pip install metacsp[viz]
+python examples/viz_timeline_demo.py
+```
+
 ## Status
 
 | Feature area | Java package | Python module |
@@ -69,7 +87,7 @@ one-line reason.
 | Sensing & dispatching | `sensing/`, `dispatching/` | `metacsp.sensing`, `metacsp.dispatching` |
 | Online monitoring (fuzzy hypothesis inference) | `onLineMonitoring/` | `metacsp.online_monitoring` |
 | JSON serialization (snapshot/delta) | — (new) | `metacsp.serialization` |
-| Live viewer (dearpygui, replaces Swing) | `utility/UI/`, `utility/timelinePlotting/` | `metacsp.viz` (`viz` extra) |
+| Live viewer (browser-based, replaces Swing) | `utility/UI/`, `utility/timelinePlotting/` | `metacsp.viz` (`viz` extra) |
 
 Full milestone-by-milestone status, architecture decisions, and porting conventions are in
 [PLAN.md](PLAN.md).
