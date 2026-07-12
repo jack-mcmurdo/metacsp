@@ -19,7 +19,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M10 — spatial geometry & geometric constraint solving
 - [x] M11 — RCC, cardinal, reachability
 - [x] M12 — DE9IM spatial relations
-- [ ] M13 — rectangle, block & temporal-rectangle algebras
+- [x] M13 — rectangle, block & temporal-rectangle algebras
 - [ ] M14 — trajectory envelopes
 - [ ] M15 — meta TCSP & resource schedulers
 - [ ] M16 — simple planner & fuzzy-activity meta solver
