@@ -23,7 +23,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M14 — trajectory envelopes
 - [x] M15 — meta TCSP & resource schedulers
 - [x] M16 — simple planner & fuzzy-activity meta solver
-- [ ] M17 — trajectory envelope scheduler
+- [x] M17 — trajectory envelope scheduler
 - [ ] M18 — hybrid planner
 - [ ] M19 — sensing & dispatching
 - [ ] M20 — online monitoring
