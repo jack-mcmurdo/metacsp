@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "metacsp"
-version = "0.0.1"
+version = "1.0.0"
 description = "Python port of the Meta-CSP Framework: meta-CSP based hybrid temporal, spatial, and resource constraint reasoning"
 readme = "README.md"
 license = { text = "MIT" }
