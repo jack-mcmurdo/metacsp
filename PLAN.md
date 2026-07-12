@@ -20,7 +20,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M11 — RCC, cardinal, reachability
 - [x] M12 — DE9IM spatial relations
 - [x] M13 — rectangle, block & temporal-rectangle algebras
-- [ ] M14 — trajectory envelopes
+- [x] M14 — trajectory envelopes
 - [ ] M15 — meta TCSP & resource schedulers
 - [ ] M16 — simple planner & fuzzy-activity meta solver
 - [ ] M17 — trajectory envelope scheduler
