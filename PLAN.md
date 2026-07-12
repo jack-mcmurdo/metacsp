@@ -30,9 +30,20 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [ ] M21 — serialization, plotting, viz protocol doc
 - [ ] M22 — examples sweep & README
 
+**Known ordering exception (M6/M7/M8):** while implementing M6, `multi/activity/`'s
+`SymbolicVariableActivity` and `ActivityNetworkSolver` turned out to depend on
+`multi/symbols/` (M7), which in turn depends on `booleanSAT/` (M8) — a real dependency
+chain `activity (M6) → symbols (M7) → booleanSAT (M8)` that the numeric milestone order
+doesn't respect. Resolution: execute this range out of numeric order — **M8, then M7,
+then the remainder of M6** — checking each off `[x]` as its own content is completed
+regardless of visitation order, then continue numerically from M9. `multi/allen_interval/`
+and the symbols-free parts of `multi/activity/` (`Activity`, `ActivityComparator`,
+`Timeline`) have no such dependency and are implemented as part of M6 directly.
+
 ## Agent protocol
 
-1. Pick the **first unchecked** milestone above.
+1. Pick the **first unchecked** milestone above, respecting the M6/M7/M8 ordering
+   exception noted there.
 2. Implement only that milestone, following the conventions and decisions below.
 3. Run `black src tests examples && pytest` until the milestone's tests **and all previous
    tests** pass.
