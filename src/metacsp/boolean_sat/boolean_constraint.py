@@ -29,8 +29,13 @@ _MALFORMED_MESSAGE = (
     "\t^ : AND\n\tv : OR\n\t-> : implication\n\t<-> : iff\n\t~ : NOT"
 )
 
-# `v` is an operator token, so variable placeholders are matched as x<digits> only.
-_TOKEN_RE = re.compile(r"<->|->|[()^~]|v|x\d+")
+# `v` is an operator token, so variable placeholders are matched as <letter><digits>
+# only. The Java parser accepts any single-letter prefix (it recovers the index via
+# `lit.toString().substring(1)`, dropping exactly one leading character regardless of
+# which letter it is) -- e.g. SymbolicVariable generates WFFs using "w1", "w2", ...
+# rather than "x1", "x2", .... Mirrored here the same way: match any single-letter
+# prefix, and later resolve the index by stripping just the first character.
+_TOKEN_RE = re.compile(r"<->|->|[()^~]|v|[a-zA-Z]\d+")
 
 
 def _tokenize(wff: str) -> list[str]:
@@ -39,12 +44,17 @@ def _tokenize(wff: str) -> list[str]:
 
 class _WffParser:
     """Recursive-descent parser for the fully-parenthesized WFF grammar:
-    ``expr := 'x' digits | '~' expr | '(' expr op expr ')'``."""
+    ``expr := <letter> digits | '~' expr | '(' expr op expr ')'``."""
 
-    def __init__(self, tokens: list[str], var_symbols: dict[str, sympy.Symbol]) -> None:
+    def __init__(self, tokens: list[str]) -> None:
         self.tokens = tokens
         self.pos = 0
-        self.var_symbols = var_symbols
+        self.var_symbols: dict[str, sympy.Symbol] = {}
+
+    def _var_symbol(self, token: str) -> sympy.Symbol:
+        if token not in self.var_symbols:
+            self.var_symbols[token] = sympy.Symbol(token)
+        return self.var_symbols[token]
 
     def _peek(self) -> str | None:
         return self.tokens[self.pos] if self.pos < len(self.tokens) else None
@@ -86,9 +96,9 @@ class _WffParser:
             if op == "<->":
                 return Equivalent(left, right)
             raise ValueError(f"unknown operator {op}")
-        if t is not None and t.startswith("x"):
+        if t is not None and re.fullmatch(r"[a-zA-Z]\d+", t):
             self._next()
-            return self.var_symbols[t]
+            return self._var_symbol(t)
         raise ValueError(f"unexpected token {t}")
 
 
@@ -108,9 +118,8 @@ class BooleanConstraint(Constraint):
         arbitrary propositional logic formula over placeholders x1..xN bound
         positionally to ``scope``."""
         try:
-            var_symbols = {f"x{i + 1}": sympy.Symbol(f"x{i + 1}") for i in range(len(scope))}
             tokens = _tokenize(wff)
-            expr = _WffParser(tokens, var_symbols).parse()
+            expr = _WffParser(tokens).parse()
             cnf = to_cnf(expr, simplify=False)
         except Exception as e:
             raise RuntimeError(_MALFORMED_MESSAGE) from e
