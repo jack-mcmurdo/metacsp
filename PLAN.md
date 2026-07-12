@@ -16,7 +16,7 @@ JSON-serialization + observer layer so a browser-based viewer can be added later
 - [x] M7 — symbolic variables & multi TCSP
 - [x] M8 — Boolean SAT
 - [x] M9 — fuzzy solvers
-- [ ] M10 — spatial geometry & geometric constraint solving
+- [x] M10 — spatial geometry & geometric constraint solving
 - [ ] M11 — RCC, cardinal, reachability
 - [ ] M12 — DE9IM spatial relations
 - [ ] M13 — rectangle, block & temporal-rectangle algebras
@@ -299,9 +299,9 @@ black-formatted (line length 100).
 - **Acceptance:** possibility degrees match the Java assertions.
 
 ### M10 — Spatial geometry & geometric constraint solving
-- [ ] `metacsp/spatial/geometry/` (mechanical numpy port per D4 note, incl.
+- [x] `metacsp/spatial/geometry/` (mechanical numpy port per D4 note, incl.
       `GeometricConstraintSolver`, `RCC2ConstraintSolver`).
-- [ ] Port examples `TestGeometricConstraintSolver{,2}.java`, `TestRCC2ConstraintSolver.java`,
+- [x] Port examples `TestGeometricConstraintSolver{,2}.java`, `TestRCC2ConstraintSolver.java`,
       `AckermannTest.java`; add `tests/test_geometry.py` asserting collision/clipping results
       on fixtures from those examples.
 - **Acceptance:** tests and examples green.
